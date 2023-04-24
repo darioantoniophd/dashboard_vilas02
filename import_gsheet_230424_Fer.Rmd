@@ -1,0 +1,47 @@
+---
+title: "import gsheet"1
+
+---
+```{r}
+# Load the googlesheets4 package
+library(googlesheets4)
+
+# Set the Google user name
+options(googlesheets4.email = "dantonio@mzptec.com")
+
+# Authenticate with Google Sheets (you may be prompted to sign in)
+gs4_auth()
+
+```
+
+
+```{r}
+options(
+  date.format = "%d/%m/%y",
+  stringsAsFactors = FALSE
+)
+
+# Get the sheet ID and sheet name
+sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
+sheet_name <- "01_Registro"
+
+# Set the range to read, starting from the fourth row
+range <- paste0(sheet_name, "!A4:AZ")
+
+# Read the sheet data into R as a data frame, using the fourth row as the column names
+my_data <- read_sheet(sheet_id, sheet_name, range, col_names = TRUE)
+my_data$Fecha <- as.Date(my_data$Fecha)
+
+# convert columns  to numeric
+my_data$Pmed_base = as.numeric(as.character(my_data$Pmed_base))
+my_data$Pmed_A10 = as.numeric(as.character(my_data$Pmed_A10))
+my_data$`A10 (600s+CT) [Pa]` = as.numeric(as.character(my_data$`A10 (600s+CT) [Pa]`))
+my_data$`A1 (60s+CT) [Pa]` = as.numeric(as.character(my_data$`A1 (60s+CT) [Pa]`))
+
+#print(sapply(my_data, class))
+
+# subtract column b from column a
+my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
+
+```
+
