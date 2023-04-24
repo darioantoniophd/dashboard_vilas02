@@ -14,7 +14,7 @@ title: "Plot A10"
 #my_data <- subset(my_data, `Comportamiento curva Pmed`!="cisne")
 
 #eliminamos las observaciones que NO se deben considerar en el análisis
-subset_data <- subset(data, `Considerar en análisis`=="si")
+subset_data <- subset(my_data, `Considerar en análisis`=="si")
 ```
 ```{r}
 #eliminamos mediciones sin datos de A10
