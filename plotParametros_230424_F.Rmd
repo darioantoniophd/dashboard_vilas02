@@ -3,6 +3,7 @@ title: "Plot A10"
 ---
 Analisis del A10 intra-prueba (intra-día)
 ```{r}
+library(usethis)
 library(ggplot2)
 library(dplyr)
 

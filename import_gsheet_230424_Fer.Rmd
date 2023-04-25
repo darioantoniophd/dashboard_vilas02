@@ -8,7 +8,7 @@ loguearse
 library(googlesheets4)
 
 # Set the Google user name
-options(googlesheets4.email = "dantonio@mzptec.com")
+# options(googlesheets4.email = "dantonio@mzptec.com")
 
 # Authenticate with Google Sheets (you may be prompted to sign in)
 gs4_auth()
