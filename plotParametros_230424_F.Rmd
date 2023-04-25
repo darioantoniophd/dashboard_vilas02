@@ -36,9 +36,8 @@ cv_data <- subset_data %>%
 obs_data <- subset_data %>%
   count(Prueba, name = "obs")
 
-
 # plot boxplot with CV and N labels
-ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, color = Muestra)) +
+ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, color = subset_data$Muestra)) +
   geom_boxplot() +
   labs(x = "Prueba", y = "A10") +
   ggtitle("A10 boxplot vs pruebas (con N y CV%)") +
@@ -72,11 +71,33 @@ ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
   geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
-  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.3)
+  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.2)
 ```
 
+Variación inter-día por muestra solo para INTEM
 ```{r}
+#subset de mediciones de INTEM
+intem <- subset_data[subset_data$Activacion == "INTEM", ]
+# calculate CV values for each group
+cv_muestra_in <- intem %>%
+  group_by(Muestra) %>%
+  summarise(cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`), 0))
 
+#para calcular el N de caja grupo/prueba
+library(dplyr)
+
+obs_muestra_in <- intem %>%
+  count(Muestra, name = "obs")
+
+#box plot con CV y N
+ggplot(intem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
+  geom_boxplot() +
+  labs(x = "Muestra", y = "A10") +
+  ggtitle("A10 de INTEM vs Muestra (con N y CV%)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
+  geom_text(data = obs_muestra_in, aes(x = Muestra, y = max(intem$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = cv_muestra_in, aes(x = Muestra, y = max(intem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.2)
 ```
 
 
