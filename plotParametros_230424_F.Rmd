@@ -22,6 +22,7 @@ subset_data <- subset_data[!is.na(subset_data$`A10 (600s+CT) [Pa]`), ]
 ```
 
 ```{r}
+library(usethis)
 library(ggplot2)
 library(dplyr)
 
