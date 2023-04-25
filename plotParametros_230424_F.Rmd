@@ -54,19 +54,22 @@ cv_muestra <- subset_data %>%
 library(dplyr)
 
 obs_muestra <- subset_data %>%
-  count(Muestra, name = "obs")
+  count(subset_data$Muestra, name = "obs")
 
 #box plot con CV y N
-ggplot(subset_data, aes(x = subset_data$Muestra, y = subset_data$`A10 (600s+CT) [Pa]`)) +
+ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   geom_boxplot() +
   labs(x = "Muestra", y = "A10") +
   ggtitle("A10 boxplot vs Muestra (con N y CV%)") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  geom_text(data = obs_data, aes(x = subset_data$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = -1, size = 3, color = "red") +
-  geom_text(data = cv_data, aes(x = subset_data$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
+  geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = -1, size = 3, color = "red") +
+  geom_text(data = cv_muestra, aes(x = obs_muestra$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
 ```
 
+```{r}
+
+```
 
 
 CARTUCHOS: Plot A10 vs prueba, color nombre de cartucho
