@@ -70,9 +70,8 @@ ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   ggtitle("A10 boxplot vs Muestra (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
-  geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 1, size = 3, color = "red") +
-  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
-
+  geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.3)
 ```
 
 ```{r}
