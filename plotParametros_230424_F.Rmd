@@ -49,7 +49,7 @@ ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`), color = subset_da
 
 ```
 
-
+Variación inter-día para cada muestra
 ```{r}
 #Variación inter-día para cada muestra
 # calculate CV values for each group
@@ -61,7 +61,7 @@ cv_muestra <- subset_data %>%
 library(dplyr)
 
 obs_muestra <- subset_data %>%
-  count(subset_data$Muestra, name = "obs")
+  count(Muestra, name = "obs")
 
 #box plot con CV y N
 ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
@@ -70,8 +70,9 @@ ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   ggtitle("A10 boxplot vs Muestra (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
-  geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = -1, size = 3, color = "red") +
-  geom_text(data = cv_muestra, aes(x = obs_muestra$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
+  geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 1, size = 3, color = "red") +
+  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
+
 ```
 
 ```{r}
@@ -97,7 +98,7 @@ ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Nro_Cartuch
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 ```
 
-
+subsets según la muestra para analizar los CV del A10 inter-prueba
 ```{r}
 #subseteamos según la muestra para analizar los CV del A10 inter-prueba
 rotrol <- subset_data[subset_data$Muestra == "ROTROL N", ]
