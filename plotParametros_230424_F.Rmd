@@ -72,7 +72,7 @@ ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   ggtitle("A10 boxplot vs Muestra (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
-  geom_text(data = obs_muestra, aes(x = N_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = N_muestra, aes(x = N_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = 0, size = 3, color = "red") +
   geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.25)
 
 # tabla con CV y N por muestra (inter-día)
@@ -169,21 +169,48 @@ N_cartucho <- subset_data %>%
 CV_N_cartuchos <- merge(cv_cartuchos, N_cartucho)
 
 #box plot con CV y N
-ggplot(subset_data, aes(x = subset_data$`Nro Cartucho`, y = `A10 (600s+CT) [Pa]`)) +
+ggplot(subset_data, aes(x = subset_data$`Nro Cartucho`, y = `A10 (600s+CT) [Pa]`, color = Muestra)) +
   geom_boxplot() +
   labs(x = "Cartucho", y = "A10") +
   ggtitle("A10 intra Cartucho (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
   geom_text(data = N_cartucho, aes(x = N_cartucho$`Nro Cartucho`, y = min(extem$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = 1, size = 3, color = "red") +
-  geom_text(data = cv_cartuchos, aes(x = N_cartucho$`Nro Cartucho`, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =45, size = 3, color = "blue", nudge_x = 0.2)
+  geom_text(data = cv_cartuchos, aes(x = N_cartucho$`Nro Cartucho`, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 2, color = "blue", nudge_x = 0.2)
 
-#subset de mediciones con dato de cartucho????
-
+#subset de mediciones con datos de cartuchos, para eliminar los "NULL"
+#????
 ```
 
-
+Plot A10 vs prueba, color según rango de QC1 (tres rangos)
 ```{r}
+QC1_10 <- subset_data[subset_data$`Canal cerrado Promedio QC1 [Pa]`< 10000, ]
+ 
+ # Cargar la paleta de colores de R
+library(RColorBrewer)
+
+# Crear los rangos
+rangos_QC1 <- cut(subset_data$`Canal cerrado Promedio QC1 [Pa]`, breaks = c(0, 10000, 15000, 25000), labels = c("menor a 10000 Pa", "entre 10000 y 15000 Pa", "mayor a 15000 Pa"))
+
+# Crear una paleta de colores
+colores <- brewer.pal(3, "Set1")
+
+#Plot A10 vs prueba, color según rango de QC1
+ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, col = colores[rangos_QC1])) +
+  geom_point(size = 3) +
+  labs(x = "Pruebas", y = "A10") +
+  ggtitle("A10 vs. Prueba coloreado según rangos de QC1") +
+  #scale_fill_discrete(guide = guide_legend(title = "Rangos de QC1")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, col = colores[rangos_QC1])) +
+  geom_point(size = 3) +
+  labs(x = "Pruebas", y = "A10") +
+  ggtitle("A10 vs. Prueba coloreado según rangos de QC1") +
+  scale_fill_discrete(guide = guide_legend(title = "Rangos QC1", title.position = "top", override.aes = list(size = 3))) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 
 ```
 
