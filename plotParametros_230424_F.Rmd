@@ -36,8 +36,9 @@ cv_data <- subset_data %>%
 obs_data <- subset_data %>%
   count(Prueba, name = "obs")
 
+
 # plot boxplot with CV and N labels
-ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`), color = subset_data$Muestra) +
+ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, color = Muestra)) +
   geom_boxplot() +
   labs(x = "Prueba", y = "A10") +
   ggtitle("A10 boxplot vs pruebas (con N y CV%)") +
