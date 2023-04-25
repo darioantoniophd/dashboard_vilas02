@@ -33,20 +33,21 @@ cv_data <- subset_data %>%
   summarise(cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`), 0))
 
 #para calcular el N de cada grupo/prueba
-obs_data <- subset_data %>%
-  count(Prueba, name = "obs")
+N_data <- subset_data %>%
+  count(Prueba, name = "N")
 
 # plot boxplot with CV and N labels
-ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, color = subset_data$Muestra)) +
+ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, color = Muestra)) +
   geom_boxplot() +
   labs(x = "Prueba", y = "A10") +
   ggtitle("A10 boxplot vs pruebas (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  geom_text(data = obs_data, aes(x = Prueba, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = -1, size = 3, color = "red") +
+  geom_text(data = N_data, aes(x = Prueba, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
   geom_text(data = cv_data, aes(x = Prueba, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
 
-
+# tabla con CV y N por prueba (intra-día)
+CV_N_intra_día <- merge(cv_data, N_data, "Prueba")
 ```
 
 Variación inter-día para cada muestra
@@ -60,8 +61,8 @@ cv_muestra <- subset_data %>%
 #para calcular el N de caja grupo/prueba
 library(dplyr)
 
-obs_muestra <- subset_data %>%
-  count(Muestra, name = "obs")
+N_muestra <- subset_data %>%
+  count(Muestra, name = "N")
 
 #box plot con CV y N
 ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
@@ -70,14 +71,18 @@ ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   ggtitle("A10 boxplot vs Muestra (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
-  geom_text(data = obs_muestra, aes(x = obs_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
-  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.2)
+  geom_text(data = obs_muestra, aes(x = N_muestra$Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = cv_muestra, aes(x = Muestra, y = max(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.25)
+
+# tabla con CV y N por muestra (inter-día)
+CV_N_inter_día <- merge(cv_muestra, N_muestra, "Muestra")
 ```
 
 Variación inter-día por muestra solo para INTEM
 ```{r}
 #subset de mediciones de INTEM
 intem <- subset_data[subset_data$Activacion == "INTEM", ]
+
 # calculate CV values for each group
 cv_muestra_in <- intem %>%
   group_by(Muestra) %>%
@@ -86,8 +91,8 @@ cv_muestra_in <- intem %>%
 #para calcular el N de caja grupo/prueba
 library(dplyr)
 
-obs_muestra_in <- intem %>%
-  count(Muestra, name = "obs")
+N_muestra_in <- intem %>%
+  count(Muestra, name = "N")
 
 #box plot con CV y N
 ggplot(intem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
@@ -96,8 +101,40 @@ ggplot(intem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   ggtitle("A10 de INTEM vs Muestra (con N y CV%)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
-  geom_text(data = obs_muestra_in, aes(x = Muestra, y = max(intem$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = N_muestra_in, aes(x = Muestra, y = max(intem$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = 0, size = 3, color = "red") +
   geom_text(data = cv_muestra_in, aes(x = Muestra, y = max(intem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.2)
+
+# tabla con CV y N por muestra para INTEM (inter-día)
+CV_N_inter_día_intem <- merge(cv_muestra_in, N_muestra_in, "Muestra")
+```
+Variación inter-día por muestra solo para EXTEM
+```{r}
+#subset de mediciones de EXTEM
+extem <- subset_data[subset_data$Activacion == "EXTEM", ]
+
+# calculate CV values for each group
+cv_muestra_ex <- extem %>%
+  group_by(Muestra) %>%
+  summarise(cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`), 0))
+
+#para calcular el N de caja grupo/prueba
+library(dplyr)
+
+N_muestra_ex <- intem %>%
+  count(Muestra, name = "N")
+
+#box plot con CV y N
+ggplot(extem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
+  geom_boxplot() +
+  labs(x = "Muestra", y = "A10") +
+  ggtitle("A10 de EXTEM vs Muestra (con N y CV%)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
+  geom_text(data = N_muestra_ex, aes(x = Muestra, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = cv_muestra_ex, aes(x = Muestra, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.2)
+
+# tabla con CV y N por muestra para EXTEM (inter-día)
+CV_N_inter_día_extem <- merge(cv_muestra_ex, N_muestra_ex, "Muestra")
 ```
 
 
@@ -149,7 +186,7 @@ table(extem$Muestra)
 
 ```
 
-
+Demases...
 ```{r}
 # Convert date range to proper format
 #start_date <- as.Date("2022-11-30")
@@ -157,54 +194,8 @@ table(extem$Muestra)
 
 
 
-# SANGRE  Muestra=="ROTROL N" | Muestra=="ROTROL_N_25"   Muestra=="PLASMA SIEMENS"  PLASMA_SIEMENS_25
-subset_data <- subset(subset_data, Muestra=="PLASMA SIEMENS"   )
-#subset_data <- subset(subset_data, Prueba=="Dia 29")
-
-# Muestra Prueba Medicion deltaPmed
-# `A1 (60s+CT) [Pa]`    `A10 (600s+CT) [Pa]`
-
-#tipo_muestra Medicion Prueba deltaPmed `Canal cerrado Promedio QC1 [Pa]`
-
-# Create plot using ggplot2
-ggplot(subset_data, aes(x = Medicion, y =`A10 (600s+CT) [Pa]`, color = Prueba)) +
-  geom_point(size = 4) +
-  geom_point() +
-  #scale_x_continuous(limits = c(0, 2000)) +
-  #scale_y_continuous(limits = c(0, 1000)) +
-  #labs(x = "delta P med", y = "A10") +
-  ggtitle("A10 vs. Medicion - Sangre") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-
-subset_data$Nro_Cartucho_Factor <- factor(subset_data$`Nro Cartucho`, levels = unique(subset_data$`Nro Cartucho`))
-
-ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Nro_Cartucho_Factor)) + 
-  geom_point(size = 4) +
-  ggtitle("A10 vs. Medicion - SANGRE") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-
-
-# calculate CV values for each group
-cv_data <- subset_data %>%
-  group_by(Prueba) %>%
-  summarise(cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`), 0))
-
-# plot boxplot with CV labels
-ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, fill = Prueba)) +
-  geom_boxplot() +
-  scale_fill_discrete(guide = guide_legend(title = "Prueba")) +
-  #labs(x = "Prueba", y = "A10") +
-  ggtitle("Boxplot A10 SANGRE con CV%") +
-  theme_bw() +
-  geom_text(data = cv_data, aes(x = Prueba, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = -.5, angle =0)
-
-
-
-
 # Append ".dat" to file_name column
-subset_data$MedicionArchivo <- paste(subset_data$Medicion, ".dat", sep = "")
+#subset_data$MedicionArchivo <- paste(subset_data$Medicion, ".dat", sep = "")
 
 ```
 
