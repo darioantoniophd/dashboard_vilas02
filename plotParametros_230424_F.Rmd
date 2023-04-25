@@ -50,6 +50,7 @@ ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`, color = Muestra)) 
 CV_N_intra_día <- merge(cv_data, N_data, "Prueba")
 ```
 
+
 Variación inter-día para cada muestra
 ```{r}
 #Variación inter-día para cada muestra
@@ -77,6 +78,7 @@ ggplot(subset_data, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
 # tabla con CV y N por muestra (inter-día)
 CV_N_inter_día <- merge(cv_muestra, N_muestra, "Muestra")
 ```
+
 
 Variación inter-día por muestra solo para INTEM
 ```{r}
@@ -107,6 +109,7 @@ ggplot(intem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
 # tabla con CV y N por muestra para INTEM (inter-día)
 CV_N_inter_día_intem <- merge(cv_muestra_in, N_muestra_in, "Muestra")
 ```
+
 Variación inter-día por muestra solo para EXTEM
 ```{r}
 #subset de mediciones de EXTEM
@@ -142,8 +145,7 @@ CARTUCHOS: Plot A10 vs prueba, color nombre de cartucho
 ```{r}
 #Plot A10 vs prueba, color nombre de cartucho
 
-#eliminamos mediciones sin datos de cartuchos
-# ??????
+subset_data$`Nro Cartucho` <- as.character(subset_data$`Nro Cartucho`)
 
 #plot
 subset_data$Nro_Cartucho_Factor <- factor(subset_data$`Nro Cartucho`, levels = unique(subset_data$`Nro Cartucho`))
@@ -154,7 +156,37 @@ ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Nro_Cartuch
   ggtitle("A10 vs. Pruebas coloreado según el cartucho") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+#CV y N intra-cartucho
+cv_cartuchos <- subset_data %>%
+  group_by(`Nro Cartucho`) %>%
+  summarise(cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`), 0))
+
+N_cartucho <- subset_data %>%
+  count(`Nro Cartucho`, name = "N")
+
+# tabla con CV y N por muestra para EXTEM (inter-día)
+CV_N_cartuchos <- merge(cv_cartuchos, N_cartucho)
+
+#box plot con CV y N
+ggplot(subset_data, aes(x = subset_data$`Nro Cartucho`, y = `A10 (600s+CT) [Pa]`)) +
+  geom_boxplot() +
+  labs(x = "Cartucho", y = "A10") +
+  ggtitle("A10 intra Cartucho (con N y CV%)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
+  geom_text(data = N_cartucho, aes(x = N_cartucho$`Nro Cartucho`, y = min(extem$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = 1, size = 3, color = "red") +
+  geom_text(data = cv_cartuchos, aes(x = N_cartucho$`Nro Cartucho`, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =45, size = 3, color = "blue", nudge_x = 0.2)
+
+#subset de mediciones con dato de cartucho????
+
 ```
+
+
+```{r}
+
+```
+
 
 subsets según la muestra para analizar los CV del A10 inter-prueba
 ```{r}
@@ -180,11 +212,6 @@ table(intem$Muestra)
 table(extem$Muestra)
 ```
 
-```{r}
-
-
-
-```
 
 Demases...
 ```{r}

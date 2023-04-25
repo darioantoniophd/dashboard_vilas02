@@ -37,11 +37,16 @@ my_data$Pmed_base = as.numeric(as.character(my_data$Pmed_base))
 my_data$Pmed_A10 = as.numeric(as.character(my_data$Pmed_A10))
 my_data$`A10 (600s+CT) [Pa]` = as.numeric(as.character(my_data$`A10 (600s+CT) [Pa]`))
 my_data$`A1 (60s+CT) [Pa]` = as.numeric(as.character(my_data$`A1 (60s+CT) [Pa]`))
+my_data$`A5 (300s+CT) [Pa]` = as.numeric(as.character(my_data$`A5 (300s+CT) [Pa]`))
+my_data$`A20 (1200s+CT) [Pa]` = as.numeric(as.character(my_data$`A20 (1200s+CT) [Pa]`))
+my_data$`CT [seg]` = as.numeric(as.character(my_data$`CT [seg]`))
+my_data$Alpha <- as.numeric(as.character(my_data$Alpha))
+my_data$`Nro Cartucho` <- as.character(my_data$`Nro Cartucho`)
+my_data$`MCF ??` = as.numeric(as.character(my_data$`MCF ??`))
+my_data$`Presion de desprendimiento [Pa]` = as.numeric(as.character(my_data$`Presion de desprendimiento [Pa]`))
+my_data$`CT [seg]` = as.numeric(as.character(my_data$`CT [seg]`))
 
-my_data <- replace(my_data, is.null(my_data), NA)
-str(my_data)
-
-#print(sapply(my_data, class))
+print(sapply(my_data, class))
 
 # creamos nueva columna deltaPmed con el resultado de la diferencia entre dos columnas
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
