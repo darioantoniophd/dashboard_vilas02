@@ -8,6 +8,12 @@ library(ggplot2)
 library(dplyr)
 library(credentials)
 
+# Para no tener que volver a tipear user/pwd en git: In the shell, enter 
+# git config --global credential.helper 'cache --timeout=10000000' 
+# to store your password # for # ten million seconds (that’s roughly 16 weeks).
+
+
+
 # Plot A10 vs prueba, color según muestra, forma según activación
 ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = Activacion)) +
   geom_point(size = 3) +
