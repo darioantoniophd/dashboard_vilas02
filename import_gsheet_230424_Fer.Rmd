@@ -1,7 +1,8 @@
 ---
 title: "import gsheet"1
-
 ---
+
+loguearse
 ```{r}
 # Load the googlesheets4 package
 library(googlesheets4)
@@ -14,12 +15,11 @@ gs4_auth()
 
 ```
 
-
+Cargar la tabla VL2-R-01-Registro de mediciones
 ```{r}
 options(
   date.format = "%d/%m/%y",
-  stringsAsFactors = FALSE
-)
+  stringsAsFactors = FALSE)
 
 # Get the sheet ID and sheet name
 sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
@@ -38,10 +38,34 @@ my_data$Pmed_A10 = as.numeric(as.character(my_data$Pmed_A10))
 my_data$`A10 (600s+CT) [Pa]` = as.numeric(as.character(my_data$`A10 (600s+CT) [Pa]`))
 my_data$`A1 (60s+CT) [Pa]` = as.numeric(as.character(my_data$`A1 (60s+CT) [Pa]`))
 
+my_data <- replace(my_data, is.null(my_data), NA)
+str(my_data)
+
 #print(sapply(my_data, class))
 
-# subtract column b from column a
+# creamos nueva columna deltaPmed con el resultado de la diferencia entre dos columnas
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
 
+```
+
+subset de la tabla para eliminar mediciones que no deben ser consideradas, según el criterio del análisis
+```{r}
+#------ subset de la tabla para eliminar mediciones que no deben ser consideradas, según el criterio del análisis
+
+#eliminamos las observaciones que NO se deben considerar en el análisis
+subset_data <- subset(my_data, `Considerar en análisis`=="si")
+
+#eliminamos mediciones sin datos de A10
+subset_data <- subset_data[!is.na(subset_data$`A10 (600s+CT) [Pa]`), ]
+
+
+# Discard NA's in subset_data$`Comportamiento curva Pmed`
+#my_data <- my_data[!is.na(my_data$`Comportamiento curva Pmed`), ]
+
+# Discard NA's in subset_data$`Comportamiento curva Pmed`
+#my_data <- subset(my_data, `Comportamiento curva Pmed`!="NA")
+
+# Discard cisnes in subset_data$`Comportamiento curva Pmed`
+#my_data <- subset(my_data, `Comportamiento curva Pmed`!="cisne")
 ```
 

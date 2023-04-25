@@ -1,33 +1,14 @@
 ---
 title: "Plot A10"
-
 ---
-
-```{r}
-# Discard NA's in subset_data$`Comportamiento curva Pmed`
-#my_data <- my_data[!is.na(my_data$`Comportamiento curva Pmed`), ]
-
-# Discard NA's in subset_data$`Comportamiento curva Pmed`
-#my_data <- subset(my_data, `Comportamiento curva Pmed`!="NA")
-
-# Discard cisnes in subset_data$`Comportamiento curva Pmed`
-#my_data <- subset(my_data, `Comportamiento curva Pmed`!="cisne")
-
-#eliminamos las observaciones que NO se deben considerar en el análisis
-subset_data <- subset(my_data, `Considerar en análisis`=="si")
-```
-```{r}
-#eliminamos mediciones sin datos de A10
-subset_data <- subset_data[!is.na(subset_data$`A10 (600s+CT) [Pa]`), ]
-```
-
+Analisis del A10 intra-prueba (intra-día)
 ```{r}
 library(usethis)
 library(ggplot2)
 library(dplyr)
 library(credentials)
 
-# Create plot using ggplot2
+# Plot A10 vs prueba, color según muestra, forma según activación
 ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = Activacion)) +
   geom_point(size = 3) +
   geom_point() +
@@ -38,15 +19,6 @@ ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Muestra, sh
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 
-subset_data$Nro_Cartucho_Factor <- factor(subset_data$`Nro Cartucho`, levels = unique(subset_data$`Nro Cartucho`))
-
-ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Nro_Cartucho_Factor)) + 
-  geom_point(size = 2) +
-  ggtitle("A10 vs. Pruebas coloreado según el cartucho") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-
-
 #------- analisis del A10 intra-prueba (intra-día)---------
 
 # calculate CV values for each group
@@ -54,16 +26,12 @@ cv_data <- subset_data %>%
   group_by(Prueba) %>%
   summarise(cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`), 0))
 
-
 #para calcular el N de cada grupo/prueba
-library(dplyr)
-
 obs_data <- subset_data %>%
   count(Prueba, name = "obs")
 
-# plot boxplot with CV labels
-#se agrega otro comando "geom_text" para agrgar el N
-ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`)) +
+# plot boxplot with CV and N labels
+ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`), color = subset_data$Muestra) +
   geom_boxplot() +
   labs(x = "Prueba", y = "A10") +
   ggtitle("A10 boxplot vs pruebas (con N y CV%)") +
@@ -74,6 +42,8 @@ ggplot(subset_data, aes(x = Prueba, y = `A10 (600s+CT) [Pa]`)) +
 
 
 ```
+
+
 ```{r}
 #Variación inter-día para cada muestra
 # calculate CV values for each group
@@ -97,6 +67,27 @@ ggplot(subset_data, aes(x = subset_data$Muestra, y = subset_data$`A10 (600s+CT) 
   geom_text(data = obs_data, aes(x = subset_data$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", obs)), vjust = -1, size = 3, color = "red") +
   geom_text(data = cv_data, aes(x = subset_data$Muestra, y = min(subset_data$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
 ```
+
+
+
+CARTUCHOS: Plot A10 vs prueba, color nombre de cartucho
+```{r}
+#Plot A10 vs prueba, color nombre de cartucho
+
+#eliminamos mediciones sin datos de cartuchos
+# ??????
+
+#plot
+subset_data$Nro_Cartucho_Factor <- factor(subset_data$`Nro Cartucho`, levels = unique(subset_data$`Nro Cartucho`))
+
+ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, color = Nro_Cartucho_Factor)) + 
+  labs(x = "Prueba", y = "A10") +
+  geom_point(size = 2) +
+  ggtitle("A10 vs. Pruebas coloreado según el cartucho") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
 
 ```{r}
 #subseteamos según la muestra para analizar los CV del A10 inter-prueba
