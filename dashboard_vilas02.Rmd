@@ -1,0 +1,83 @@
+---
+title: "Untitled"
+output: flexdashboard::flex_dashboard
+orientation: columns
+vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(ggplot2)
+
+```
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared
+# by all users of the dashboard
+load(file = "subset_data.Rdata")
+
+
+# Function that filters dataset midata where column Muestra takes values in values_muestra. Then plots specified column "a_col" versus specified column "x_col" of specified dataset "midata" using column "color_col" for color
+
+my_plot <- function(midata, x_col, a_col, color_col, shape_col, values_muestra, values_activacion) {
+ 
+  # Filter data to include only rows where muestra is in values_muestra
+ filtered_data <- subset(midata, Muestra %in% values_muestra & Activacion %in% values_activacion)
+  
+  # Create scatter plot using ggplot2
+  ggplot(filtered_data, aes(x = .data[[x_col]], y = .data[[a_col]], shape = .data[[shape_col]], color = .data[[color_col]])) +
+    geom_point(size= 3) +
+    labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+}
+  
+ 
+
+```
+
+Column {.sidebar}
+--------------------------------------------------
+
+```{r}
+selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE)
+selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE)
+selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A5 (300s+CT) [Pa]'), multiple = FALSE)
+
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+  
+  # Render scatter plot based on filtered data object and user's selected x, a, and color columns
+  renderPlot({
+    my_plot(midata = subset_data, x_col = "Prueba", a_col = input$value_amplitud, color_col = "Muestra",  shape_col = "Activacion", values_muestra = input$values_muestra, values_activacion = input$values_activacion)
+  })
+
+
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+

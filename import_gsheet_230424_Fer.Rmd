@@ -61,6 +61,8 @@ subset_data <- subset(my_data, `Problema`=="ninguno")
 #eliminamos mediciones sin datos de A10
 subset_data <- subset_data[!is.na(subset_data$`A10 (600s+CT) [Pa]`), ]
 
+#guardar el dataset en el disco
+save(subset_data, file = "subset_data.Rdata")
 
 # Discard NA's in subset_data$`Comportamiento curva Pmed`
 #my_data <- my_data[!is.na(my_data$`Comportamiento curva Pmed`), ]
