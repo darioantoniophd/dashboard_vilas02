@@ -224,8 +224,36 @@ ggplot(problemas, aes(x="", y= frecuencia, fill=`Tipo de problema`)) +
   theme_void()
 ```
 
-```{r}
 
+Correlación entre A10 y la diferencia de presión media (deltaPmed)
+```{r}
+#gráfico de todas las mediciones coloreadas por muestra
+ggplot(subset_data, aes(x = `deltaPmed`, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = Activacion)) +
+  geom_point(size = 2) +
+  labs(x = "deltaPmed", y = "A10") +
+  ggtitle("A10 vs. deltaPmed, coloreado por muestra") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
+
+#gráfico de las mediciones realizadas con INTEM, coloreadas por muestra e identificadas según el comportamiento de la curva de presión media
+ggplot(intem, aes(x = `deltaPmed`, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = `Comportamiento curva Pmed`)) +
+  geom_point(size = 2) +
+  labs(x = "deltaPmed", y = "A10") +
+  ggtitle("A10 vs. deltaPmed para INTEM, coloreado por muestra, e identificado según 
+          el comportamiento de la curva de presión media") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
+
+#gráfico de A10 vs deltaPmed para mediciones realizadas con Plasma Siemens
+sub_subset <- subset_data[subset_data$Muestra == "PLASMA SIEMENS", ]
+
+ggplot(sub_subset, aes(x = `deltaPmed`, y =`A10 (600s+CT) [Pa]`, color = `Comportamiento curva Pmed`, shape = `Activacion`)) +
+  geom_point(size = 2) +
+  labs(x = "deltaPmed", y = "A10") +
+  ggtitle("A10 vs. deltaPmed para PlasmaS, coloreado según 
+          el comportamiento de la curva de presión media") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
 ```
 
 
