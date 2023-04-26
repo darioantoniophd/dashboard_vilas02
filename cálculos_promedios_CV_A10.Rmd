@@ -1,0 +1,94 @@
+---
+title: "Tabla de promedio, CV y N de A10"
+output: html_notebook
+---
+
+subsets según las muestras y según muestra-activación
+```{r}
+#subseteamos según la muestra para analizar los CV del A10 inter-prueba
+rotrol <- subset_data[subset_data$Muestra == "ROTROL N", ]
+rotrol_25 <- subset_data[subset_data$Muestra == "ROTROL_N_25", ]
+sangre <- subset_data[subset_data$Muestra == "SANGRE", ]
+plasma <- subset_data[subset_data$Muestra == "PLASMA SIEMENS", ]
+plasma_25 <- subset_data[subset_data$Muestra == "PLASMA_SIEMENS_25", ]
+plasma_in <- plasma[plasma$Activacion == "INTEM", ]
+plasma_ex <- plasma[plasma$Activacion == "EXTEM", ]
+rotrol_in <- rotrol[rotrol$Activacion == "INTEM", ]
+rotrol_ex <- rotrol[rotrol$Activacion == "EXTEM", ]
+sangre_in <- sangre[sangre$Activacion == "INTEM", ]
+sangre_ex <- sangre[sangre$Activacion == "EXTEM", ]
+
+#subseteamos según la activación
+intem <- subset_data[subset_data$Activacion == "INTEM", ]
+extem <- subset_data[subset_data$Activacion == "EXTEM", ]
+```
+
+
+Tablas 
+CV de A10 intra-prueba (intra-día). Se calcula el promedio de los CV (con summary) luego de crear la tabla de estadísticos 
+```{r}
+#separado por Prueba (intra-dia)
+mean_sd_CV_prueba <- subset_data %>%
+  group_by(Prueba) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_data <- subset_data %>%
+  count(Prueba, name = "N")
+
+mean_sd_CV_N_intra_día <- merge(mean_sd_CV_prueba, N_data, "Prueba")
+colnames(mean_sd_CV_N_intra_día) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+
+summary(mean_sd_CV_N_intra_día$`CV %`)
+
+```
+
+
+CV promedio para ROTROL. Se calcula el promedio de los CV (con summary) luego de crear la tabla de estadísticos 
+```{r}
+#con subset previo
+#ROTROL N separado por Prueba
+mean_sd_CV_rotrol <- rotrol %>%
+  group_by(Prueba) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_rotrol <- rotrol %>%
+  count(Prueba, name = "N")
+
+mean_sd_CV_N_interDia_rotrol <- merge(mean_sd_CV_rotrol, N_rotrol, "Prueba")
+colnames(mean_sd_CV_N_interDia_rotrol) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+
+summary(mean_sd_CV_N_interDia_rotrol$`CV %`)
+
+```
+
+
+
+CV de A10 intra-muestra (inter-día para cada muestra)
+```{r}
+#separado por Muestra
+mean_sd_CV_muestra <- subset_data %>%
+  group_by(Muestra) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_muestra <- subset_data %>%
+  count(Muestra, name = "N")
+
+mean_sd_CV_N_intra_muestra <- merge(mean_sd_CV_muestra, N_muestra, "Muestra")
+colnames(mean_sd_CV_N_intra_muestra) = c("Muestra", "Promedio", "desviación st", "CV %", "N")
+
+summary(mean_sd_CV_N_intra_muestra$`CV %`)
+```
+
+
+Demases...
+```{r}
+# Convert date range to proper format
+#start_date <- as.Date("2022-11-30")
+#end_date <- as.Date("2023-04-05")
+
+
+
+# Append ".dat" to file_name column
+#subset_data$MedicionArchivo <- paste(subset_data$Medicion, ".dat", sep = "")
+
+```
