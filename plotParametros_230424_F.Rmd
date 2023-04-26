@@ -207,16 +207,25 @@ ggplot(subset_data, aes(x = Prueba, y =`A10 (600s+CT) [Pa]`, col = colores[rango
 
 ```
 
-Tabla para analizar frecuencia y tipo de problemas
+Tabla y gráfico para analizar frecuencia y tipo de problemas
 ```{r}
 
 problemas <- data.frame(table(my_data$Problema))
-porcentaje <- c(1:16)
-problemas <- cbind(problemas, porcentaje)
-colnames(problemas) = c("Tipo de problema", "N", "frecuencia")
-sum(problemas$N)
-problemas$frecuencia <- problemas$N*100/sum(problemas$N)
-problemas$frecuencia <-  sprintf("%.1f", problemas$frecuencia)
+colnames(problemas) = c("Tipo de problema", "frecuencia")
+problemas$frecuencia <- problemas$frecuencia*100/sum(problemas$frecuencia)
+#problemas$frecuencia <-  sprintf("%.1f", problemas$frecuencia)
+
+library(ggplot2)
+ggplot(problemas, aes(x="", y= frecuencia, fill=`Tipo de problema`)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  ggtitle("Frecuencia de problemas") +
+  guides(colour = guide_legend(title = "Tipo de problema", title.position = "top", override.aes = list(size = 3)))
+  theme_void()
+```
+
+```{r}
+
 ```
 
 
