@@ -121,8 +121,11 @@ cv_muestra_ex <- extem %>%
 #para calcular el N de caja grupo/prueba
 library(dplyr)
 
-N_muestra_ex <- intem %>%
+N_muestra_ex <- extem %>%
   count(Muestra, name = "N")
+
+# tabla con CV y N por muestra para EXTEM (inter-día)
+CV_N_inter_día_extem <- merge(cv_muestra_ex, N_muestra_ex, "Muestra")
 
 #box plot con CV y N
 ggplot(extem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
@@ -134,8 +137,6 @@ ggplot(extem, aes(x = Muestra, y = `A10 (600s+CT) [Pa]`)) +
   geom_text(data = N_muestra_ex, aes(x = Muestra, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", N)), vjust = 0, size = 3, color = "red") +
   geom_text(data = cv_muestra_ex, aes(x = Muestra, y = max(extem$`A10 (600s+CT) [Pa]`), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.2)
 
-# tabla con CV y N por muestra para EXTEM (inter-día)
-CV_N_inter_día_extem <- merge(cv_muestra_ex, N_muestra_ex, "Muestra")
 ```
 
 
@@ -180,6 +181,8 @@ ggplot(subset_data, aes(x = subset_data$`Nro Cartucho`, y = `A10 (600s+CT) [Pa]`
 #????
 ```
 
+
+
 Plot A10 vs prueba, color según rango de QC1 (tres rangos)
 ```{r}
 QC1_10 <- subset_data[subset_data$`Canal cerrado Promedio QC1 [Pa]`< 10000, ]
@@ -211,8 +214,8 @@ Tabla y gráfico para analizar frecuencia y tipo de problemas
 problemas <- data.frame(table(my_data$Problema))
 colnames(problemas) = c("Tipo de problema", "frecuencia")
 problemas$frecuencia <- problemas$frecuencia*100/sum(problemas$frecuencia)
-#problemas$frecuencia <-  sprintf("%.1f", problemas$frecuencia)
 
+#gráfico de torta
 library(ggplot2)
 ggplot(problemas, aes(x="", y= frecuencia, fill=`Tipo de problema`)) +
   geom_col(width=1) +
@@ -220,6 +223,13 @@ ggplot(problemas, aes(x="", y= frecuencia, fill=`Tipo de problema`)) +
   ggtitle("Frecuencia de problemas") +
   guides(colour = guide_legend(title = "Tipo de problema", title.position = "top", override.aes = list(size = 3)))
   theme_void()
+
+#gráfico de barras
+ggplot(problemas, aes(x= `Tipo de problema`, y= `frecuencia`)) +
+  geom_bar(stat="identity", fill="blue") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  labs(x="Tipo de problema", y="Frecuencia", title="Distribución de tipos de problemas")
 ```
 
 
@@ -266,7 +276,7 @@ ggplot(sub_subset, aes(x = `deltaPmed`, y =`A10 (600s+CT) [Pa]`, color = Muestra
   theme(axis.text.x = element_text(angle = 0, vjust = 0))
 ```
 
-Plot A10 vs Presión de desprendimiento, color prueba
+Plot A10 vs Presión de desprendimiento
 ```{r}
 #Plot A10 vs Presión de desprendimiento, color Muestra
 ggplot(subset_data, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = Activacion)) +
@@ -277,7 +287,11 @@ ggplot(subset_data, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT)
   theme(axis.text.x = element_text(angle = 0, vjust = 0))
 
 #Plot A10 vs Presión de desprendimiento, coloreado según la prueba 
-ggplot(subset_data, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) [Pa]`, color = Prueba, shape = Muestra)) +
+
+# Eliminar las filas que contienen NA en "presión de desprendimiento"
+sub_subset <- subset_data[complete.cases(subset_data$`Presion de desprendimiento [Pa]`), ]
+
+ggplot(sub_subset, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) [Pa]`, color = Prueba, shape = Muestra)) +
   geom_point(size = 2) +
   labs(x = "Presión de desprendimiento o ruptura", y = "A10") +
   ggtitle("A10 vs. Presión de desprendimiento o ruptura, coloreado por muestra") +
@@ -295,47 +309,4 @@ ggplot(sub_subset, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) 
   theme(axis.text.x = element_text(angle = 0, vjust = 0))
 ```
 
-
-subsets según la muestra para analizar los CV del A10 inter-prueba
-```{r}
-#subseteamos según la muestra para analizar los CV del A10 inter-prueba
-rotrol <- subset_data[subset_data$Muestra == "ROTROL N", ]
-rotrol_25 <- subset_data[subset_data$Muestra == "ROTROL_N_25", ]
-sangre <- subset_data[subset_data$Muestra == "SANGRE", ]
-plasma <- subset_data[subset_data$Muestra == "PLASMA SIEMENS", ]
-plasma_25 <- subset_data[subset_data$Muestra == "PLASMA_SIEMENS_25", ]
-plasma_in <- plasma[plasma$Activacion == "INTEM", ]
-plasma_ex <- plasma[plasma$Activacion == "EXTEM", ]
-rotrol_in <- rotrol[rotrol$Activacion == "INTEM", ]
-rotrol_ex <- rotrol[rotrol$Activacion == "EXTEM", ]
-sangre_in <- sangre[sangre$Activacion == "INTEM", ]
-sangre_ex <- sangre[sangre$Activacion == "EXTEM", ]
-
-#subseteamos según la activación
-intem <- subset_data[subset_data$Activacion == "INTEM", ]
-extem <- subset_data[subset_data$Activacion == "EXTEM", ]
-```
-```{r}
-table(intem$Muestra)
-table(extem$Muestra)
-```
-
-
-Demases...
-```{r}
-# Convert date range to proper format
-#start_date <- as.Date("2022-11-30")
-#end_date <- as.Date("2023-04-05")
-
-
-
-# Append ".dat" to file_name column
-#subset_data$MedicionArchivo <- paste(subset_data$Medicion, ".dat", sep = "")
-
-```
-
-
-
-
-```
 
