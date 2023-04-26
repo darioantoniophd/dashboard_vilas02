@@ -17,21 +17,20 @@ library(ggplot2)
 # load data in 'global' chunk so it can be shared
 # by all users of the dashboard
 load(file = "subset_data.Rdata")
-
+load(file = "my_data.Rdata")
 
 # Function that filters dataset midata where column Muestra takes values in values_muestra. Then plots specified column "a_col" versus specified column "x_col" of specified dataset "midata" using column "color_col" for color
 
-my_plot <- function(midata, x_col, a_col, color_col, shape_col, values_muestra, values_activacion) {
+my_plot <- function(midata, x_col, a_col, color_col, shape_col) {
  
-  # Filter data to include only rows where muestra is in values_muestra
- filtered_data <- subset(midata, Muestra %in% values_muestra & Activacion %in% values_activacion)
-  
+ 
   # Create scatter plot using ggplot2
-  ggplot(filtered_data, aes(x = .data[[x_col]], y = .data[[a_col]], shape = .data[[shape_col]], color = .data[[color_col]])) +
+  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
     geom_point(size= 3) +
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+ 
 }
   
  
@@ -46,6 +45,10 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE)
 selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A5 (300s+CT) [Pa]'), multiple = FALSE)
 
+# Date range input widgets
+dateRangeInput("date_range", "Select date range:", 
+                 start = NULL, end = NULL, 
+                 format = "yyyy-mm-dd", separator = " to ")
 ```
 
 Column {data-width=650}
@@ -55,12 +58,28 @@ Column {data-width=650}
 
 ```{r}
 
-  
-  # Render scatter plot based on filtered data object and user's selected x, a, and color columns
-  renderPlot({
-    my_plot(midata = subset_data, x_col = "Prueba", a_col = input$value_amplitud, color_col = "Muestra",  shape_col = "Activacion", values_muestra = input$values_muestra, values_activacion = input$values_activacion)
+
+
+ # Create reactive subset data
+  reactive_my_data <- reactive({
+    subset(my_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2])
   })
 
+
+reactive_subset_data <- reactive({
+    subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2])
+  })
+
+  # Render scatter plot based on filtered data object and user's selected x, a, and color columns
+  renderPlot({
+    my_plot(midata = reactive_subset_data(), x_col = "Prueba", a_col = input$value_amplitud, color_col = "Muestra",  shape_col = "Activacion")
+  })
 
 
 
@@ -72,12 +91,56 @@ Column {data-width=350}
 ### Chart B
 
 ```{r}
+renderPlot({
 
+
+# Create a data frame with the count of each value in the "Problema" column
+problema_count <- data.frame(table(reactive_my_data()$Problema))
+
+# Add a column to indicate whether the value is "ninguno" or not
+problema_count$is_ninguno <- ifelse(problema_count$Var1 == "ninguno", "ninguno", "otro")
+
+# Summarize the counts by "ninguno" and "otro"
+problema_summary <- aggregate(Freq ~ is_ninguno, data = problema_count, sum)
+
+# Plot the summary using a stacked bar plot
+ggplot(problema_summary, aes(x = "", y = Freq, fill = is_ninguno)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  xlab("") +
+  ylab("Count") +
+  ggtitle("Count of rows with 'ninguno' vs other values in 'Problema' column") +
+  geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
+            position = position_stack(vjust = 0.5))
+})  
+  
 ```
 
 ### Chart C
 
 ```{r}
+library(RColorBrewer)
 
+renderPlot({
+# Create a data frame with the count of each value in the "Problema" column
+problema_count <- data.frame(table(reactive_my_data()$Problema))
+
+# Remove the rows with "ninguno"
+problema_count <- problema_count[problema_count$Var1 != "ninguno", ]
+
+# Set the fill colors using the Paired color palette
+fill_colors <- brewer.pal(nrow(problema_count), "Paired")
+
+# Plot the counts of rows by value using a stacked bar plot with contrasting colors
+ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  xlab("") +
+  ylab("Count") +
+  ggtitle("Count of rows with values other than 'ninguno' in 'Problema' column, grouped by value") +
+  scale_fill_manual(values = fill_colors) +
+  geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
+            position = position_stack(vjust = 0.5))
+})  
 ```
 
