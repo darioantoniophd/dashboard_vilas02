@@ -254,6 +254,47 @@ ggplot(sub_subset, aes(x = `deltaPmed`, y =`A10 (600s+CT) [Pa]`, color = `Compor
           el comportamiento de la curva de presión media") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 0, vjust = 0))
+
+
+
+#plot de aquellas mediciones con deltaPmed mayor a 400
+sub_subset <- subset_data[subset_data$deltaPmed > 800, ]
+
+ggplot(sub_subset, aes(x = `deltaPmed`, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = `Comportamiento curva Pmed`)) +
+  geom_point(size = 2) +
+  labs(x = "deltaPmed", y = "A10") +
+  ggtitle("A10 vs. deltaPmed para mediciones con deltaPmed mayor a 800 Pa") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
+```
+
+Plot A10 vs Presión de desprendimiento, color prueba
+```{r}
+#Plot A10 vs Presión de desprendimiento, color Muestra
+ggplot(subset_data, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) [Pa]`, color = Muestra, shape = Activacion)) +
+  geom_point(size = 2) +
+  labs(x = "Presión de desprendimiento o ruptura", y = "A10") +
+  ggtitle("A10 vs. Presión de desprendimiento o ruptura, coloreado por muestra") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
+
+#Plot A10 vs Presión de desprendimiento, coloreado según la prueba 
+ggplot(subset_data, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) [Pa]`, color = Prueba, shape = Muestra)) +
+  geom_point(size = 2) +
+  labs(x = "Presión de desprendimiento o ruptura", y = "A10") +
+  ggtitle("A10 vs. Presión de desprendimiento o ruptura, coloreado por muestra") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
+
+#Plot A10 vs Presión de desprendimiento, para Sangre
+sub_subset <- subset_data[subset_data$Muestra == "SANGRE", ]
+
+ggplot(sub_subset, aes(x = `Presion de desprendimiento [Pa]`, y =`A10 (600s+CT) [Pa]`, color = Activacion)) +
+  geom_point(size = 2) +
+  labs(x = "Presión de desprendimiento o ruptura", y = "A10") +
+  ggtitle("A10 vs. Presión de desprendimiento o ruptura, para mediciones con SANGRE") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0))
 ```
 
 
