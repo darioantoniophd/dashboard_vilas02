@@ -25,58 +25,183 @@ extem <- subset_data[subset_data$Activacion == "EXTEM", ]
 
 
 Tablas 
-CV de A10 intra-prueba (intra-día). Se calcula el promedio de los CV (con summary) luego de crear la tabla de estadísticos 
+TABLA de CV y promedio de A10 intra-prueba (intra-día), y promedio de los CV
 ```{r}
+library(dplyr)
+
 #separado por Prueba (intra-dia)
-mean_sd_CV_prueba <- subset_data %>%
+A10_prueba <- subset_data %>%
   group_by(Prueba) %>%
   summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
 
-N_data <- subset_data %>%
+N_prueba <- subset_data %>%
   count(Prueba, name = "N")
 
-mean_sd_CV_N_intra_día <- merge(mean_sd_CV_prueba, N_data, "Prueba")
-colnames(mean_sd_CV_N_intra_día) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+A10_intra_Prueba <- merge(A10_prueba, N_prueba, "Prueba")
+colnames(A10_intra_Prueba) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
 
-summary(mean_sd_CV_N_intra_día$`CV %`)
+#todos los estadísticos
+print(summary(A10_intra_Prueba$`CV %`))
 
+#eliminamos filas con NA para calcular el promedio aritmético
+CV_promedio_intraPrueba <- A10_intra_Prueba[complete.cases(A10_intra_Prueba), ]
+
+#promedio de CV de A10 intra Prueba
+CV_promedio_intraPrueba <- (mean(CV_promedio_intraPrueba$`CV %`))
 ```
 
 
-CV promedio para ROTROL. Se calcula el promedio de los CV (con summary) luego de crear la tabla de estadísticos 
-```{r}
-#con subset previo
-#ROTROL N separado por Prueba
-mean_sd_CV_rotrol <- rotrol %>%
-  group_by(Prueba) %>%
-  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
-
-N_rotrol <- rotrol %>%
-  count(Prueba, name = "N")
-
-mean_sd_CV_N_interDia_rotrol <- merge(mean_sd_CV_rotrol, N_rotrol, "Prueba")
-colnames(mean_sd_CV_N_interDia_rotrol) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
-
-summary(mean_sd_CV_N_interDia_rotrol$`CV %`)
-
-```
-
-
-
-CV de A10 intra-muestra (inter-día para cada muestra)
+TABLA de CV y promedio de A10 intra-Muestra (inter-día), y promedio de los CV
 ```{r}
 #separado por Muestra
-mean_sd_CV_muestra <- subset_data %>%
+A10_muestra <- subset_data %>%
   group_by(Muestra) %>%
   summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
 
 N_muestra <- subset_data %>%
   count(Muestra, name = "N")
 
-mean_sd_CV_N_intra_muestra <- merge(mean_sd_CV_muestra, N_muestra, "Muestra")
-colnames(mean_sd_CV_N_intra_muestra) = c("Muestra", "Promedio", "desviación st", "CV %", "N")
+A10_intra_muestra <- merge(A10_muestra, N_muestra, "Muestra")
+colnames(A10_intra_muestra) = c("Muestra", "Promedio", "desviación st", "CV %", "N")
 
-summary(mean_sd_CV_N_intra_muestra$`CV %`)
+#todos los estadísticos
+summary(A10_intra_muestra$`CV %`)
+
+#eliminamos filas con NA para calcular el promedio aritmético
+CV_promedio_intraMuestra <- A10_intra_muestra[complete.cases(A10_intra_muestra), ]
+
+#promedio de CV de A10 intra Prueba
+CV_promedio_intraMuestra <- (mean(CV_promedio_intraMuestra$`CV %`))
+```
+
+ROTROL N
+TABLA de CV y promedio de A10 intra-prueba (intra-día), y promedio de los CV para ROTROL.
+```{r}
+
+#ROTROL N separado por Prueba
+A10_prueba_rotrol <- subset_data[which(subset_data$Muestra == "ROTROL N"), ] %>%
+  group_by(Prueba) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_rotrol <- subset_data[which(subset_data$Muestra == "ROTROL N"), ] %>%
+  count(Prueba, name = "N")
+
+A10_intra_Prueba_rotrol <- merge(A10_prueba_rotrol, N_rotrol, "Prueba")
+colnames(A10_intra_Prueba_rotrol) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+
+#todos los estadísticos
+print(summary(A10_intra_Prueba_rotrol$`CV %`))
+
+#eliminamos filas con NA para calcular el promedio aritmético
+CV_promedio_intraPrueba_rotrol <- A10_intra_Prueba_rotrol[complete.cases(A10_intra_Prueba_rotrol), ]
+
+#promedio de CV de A10 intra Prueba
+CV_promedio_intraPrueba_rotrol <- (mean(CV_promedio_intraPrueba_rotrol$`CV %`))
+```
+
+PLASMA SIEMENS
+TABLA de CV y promedio de A10 intra-prueba (intra-día), y promedio de los CV para PLASMA SIEMENS.
+```{r}
+
+#ROTROL N separado por Prueba
+A10_prueba_plasmaS <- subset_data[which(subset_data$Muestra == "PLASMA SIEMENS"), ] %>%
+  group_by(Prueba) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_plasmaS <- subset_data[which(subset_data$Muestra == "PLASMA SIEMENS"), ] %>%
+  count(Prueba, name = "N")
+
+A10_intra_Prueba_plasmaS <- merge(A10_prueba_plasmaS, N_plasmaS, "Prueba")
+colnames(A10_intra_Prueba_plasmaS) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+
+#todos los estadísticos
+print(summary(A10_intra_Prueba_plasmaS$`CV %`))
+
+#eliminamos filas con NA para calcular el promedio aritmético
+CV_promedio_intraPrueba_plasmaS <- A10_intra_Prueba_plasmaS[complete.cases(A10_intra_Prueba_plasmaS), ]
+
+#promedio de CV de A10 intra Prueba
+CV_promedio_intraPrueba_plasmaS <- (mean(CV_promedio_intraPrueba_plasmaS$`CV %`))
+```
+
+SANGRE
+TABLA de CV y promedio de A10 intra-prueba (intra-día), y promedio de los CV para SANGRE.
+```{r}
+
+#ROTROL N separado por Prueba
+A10_prueba_sangre <- subset_data[which(subset_data$Muestra == "SANGRE"), ] %>%
+  group_by(Prueba) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_sangre <- subset_data[which(subset_data$Muestra == "SANGRE"), ] %>%
+  count(Prueba, name = "N")
+
+A10_intra_Prueba_sangre <- merge(A10_prueba_sangre, N_sangre, "Prueba")
+colnames(A10_intra_Prueba_sangre) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+
+#todos los estadísticos
+print(summary(A10_intra_Prueba_sangre$`CV %`))
+
+#eliminamos filas con NA para calcular el promedio aritmético
+CV_promedio_intraPrueba_sangre <- A10_intra_Prueba_sangre[complete.cases(A10_intra_Prueba_sangre), ]
+
+#promedio de CV de A10 intra Prueba
+CV_promedio_intraPrueba_sangre <- (mean(CV_promedio_intraPrueba_sangre$`CV %`))
+```
+
+plasma PP
+TABLA de CV y promedio de A10 intra-prueba (intra-día), y promedio de los CV para plasma pp.
+```{r}
+
+#ROTROL N separado por Prueba
+A10_prueba_plasmaPP <- subset_data[which(subset_data$Muestra == "plasma PP"), ] %>%
+  group_by(Prueba) %>%
+  summarise(mean(`A10 (600s+CT) [Pa]`), sd(`A10 (600s+CT) [Pa]`), cv = round(100*sd(`A10 (600s+CT) [Pa]`)/mean(`A10 (600s+CT) [Pa]`)))
+
+N_plasmaPP <- subset_data[which(subset_data$Muestra == "plasma PP"), ] %>%
+  count(Prueba, name = "N")
+
+A10_intra_Prueba_plasmaPP <- merge(A10_prueba_plasmaPP, N_plasmaPP, "Prueba")
+colnames(A10_intra_Prueba_plasmaPP) = c("Prueba", "Promedio", "desviación st", "CV %", "N")
+
+#todos los estadísticos
+print(summary(A10_intra_Prueba_plasmaPP$`CV %`))
+
+#eliminamos filas con NA para calcular el promedio aritmético
+CV_promedio_intraPrueba_plasmaPP <- A10_intra_Prueba_plasmaPP[complete.cases(A10_intra_Prueba_plasmaPP), ]
+
+#promedio de CV de A10 intra Prueba
+CV_promedio_intraPrueba_plasmaPP <- (mean(CV_promedio_intraPrueba_plasmaPP$`CV %`))
+```
+
+
+```{r}
+#TABLA VARIABILIDAD DE A10.
+#En esta tabla de colocan los CV promedio, calculados a partir de los CVs intraprueba
+Criterio <- c("promedio-intraPrueba", "promedio-intraMuestra", "promedio-intraPrueba_Rotrol", "promedio-intraPrueba_PlasmaS", "promedio-intraPrueba_Sangre", "promedio-intraPrueba_PlasmaPP")
+
+CV_promedio <- c(CV_promedio_intraPrueba, CV_promedio_intraMuestra, CV_promedio_intraPrueba_rotrol, CV_promedio_intraPrueba_plasmaS, CV_promedio_intraPrueba_sangre, CV_promedio_intraPrueba_plasmaPP)
+
+N <- c(nrow(N_prueba), nrow(N_muestra), nrow(N_rotrol), nrow(N_plasmaS), nrow(N_sangre), nrow(N_plasmaPP))
+Variabilidad_A10 <- data.frame(cbind(Criterio, CV_promedio, N))
+
+#agregando los CV intra-muestra para cada muestra
+Criterio2 <- c("intra_plasmaPP", "intra_plasmaS", "intra_plasmaS_25", "intra_rotrolN", "intra_rotrolN_25", "intra_sangre", "intra_sangre_vieja", "promedio-intraMuestra", "promedio-intraPrueba", "promedio-intraPrueba_Rotrol", "promedio-intraPrueba_PlasmaS", "promedio-intraPrueba_Sangre", "promedio-intraPrueba_PlasmaPP")
+
+CV_promedio2 <- c(A10_intra_muestra$`CV %`, CV_promedio_intraMuestra, CV_promedio_intraPrueba, CV_promedio_intraPrueba_rotrol, CV_promedio_intraPrueba_plasmaS, CV_promedio_intraPrueba_sangre, CV_promedio_intraPrueba_plasmaPP)
+
+N2 <- c(A10_intra_muestra$N, nrow(N_muestra), nrow(N_prueba), nrow(N_rotrol), nrow(N_plasmaS), nrow(N_sangre), nrow(N_plasmaPP))
+Variabilidad_A10_2 <- data.frame(cbind(Criterio2, CV_promedio2, N2))
+```
+
+```{r}
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+  
+conjunto <- c("rotrol", "rotrol", "rotrol", "rotrol", "rotrol", "rotrol", "plasma")
+moda <- Mode(conjunto)
 ```
 
 
