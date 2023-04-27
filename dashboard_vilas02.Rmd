@@ -21,15 +21,72 @@ load(file = "my_data.Rdata")
 
 # Function that filters dataset midata where column Muestra takes values in values_muestra. Then plots specified column "a_col" versus specified column "x_col" of specified dataset "midata" using column "color_col" for color
 
-my_plot <- function(midata, x_col, a_col, color_col, shape_col) {
+my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
  
- 
-  # Create scatter plot using ggplot2
-  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
+ if (plot_type == "scatter_A_vs_Prueba") {
+   # Create scatter plot using ggplot2
+  ggplot(midata, aes(x = Prueba, y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
     geom_point(size= 3) +
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+ } else if (plot_type == "scatter_A_vs_Pmed"){
+    ggplot(midata, aes(x = deltaPmed, y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
+    geom_point(size= 3) +
+    labs(title = paste0(a_col, " vs. ", "deltaPmed"), x = "deltaPmed", y = a_col, color = color_col, shape=shape_col)+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+ } else if (plot_type == "scatter_A_vs_Pruptura"){
+    ggplot(midata, aes(x = `Presion de desprendimiento [Pa]`, y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
+    geom_point(size= 3) +
+    labs(title = paste0(a_col, " vs. ", "Presión de desprendimiento o ruptura"), x = "Presión de desprendimiento o ruptura", y = a_col, color = color_col, shape=shape_col)+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+   
+} else if (plot_type == "boxplot_por_prueba"){
+  # boxplot with labels
+  # calculate CV values for each group
+  cv_data <- midata %>%
+  group_by(Prueba) %>%
+  summarise(cv = round(100*sd(.data[[a_col]])/mean(.data[[a_col]]), 0))
+  #para calcular el N de cada grupo/prueba
+  N_data <- midata %>%
+  count(Prueba, name = "N")
+  # plot boxplot with CV and N labels
+  ggplot(midata, aes(x = Prueba, y = .data[[a_col]], color = .data[[color_col]])) +
+  geom_boxplot() +
+  labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  geom_text(data = N_data, aes(x = Prueba, y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
+  geom_text(data = cv_data, aes(x = Prueba, y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
+}
+  else if (plot_type == "boxplot_por_muestra"){
+  
+  #Variación inter-día para cada muestra
+# calculate CV values for each group
+cv_muestra <- midata %>%
+  group_by(Muestra) %>%
+  summarise(cv = round(100*sd(.data[[a_col]])/mean(.data[[a_col]]), 0))
+
+#para calcular el N de caja grupo/prueba
+library(dplyr)
+
+N_muestra <- midata %>%
+  count(Muestra, name = "N")
+
+#box plot con CV y N
+ggplot(midata, aes(x = Muestra, y = .data[[a_col]])) +
+  geom_boxplot() +
+  labs(title = paste0(a_col, " vs. ", "Muestra"), x = "Muestra", y = a_col)+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7)) +
+  geom_text(data = N_muestra, aes(x = N_muestra$Muestra, y = max(midata[[a_col]]), label = paste0("", N)), vjust = 0, size = 3, color = "red") +
+  geom_text(data = cv_muestra, aes(x = Muestra, y = max(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 0, angle =0, size = 3, color = "blue", nudge_x = 0.25)
+
+  
+  }
+  
  
 }
   
@@ -41,14 +98,23 @@ Column {.sidebar}
 --------------------------------------------------
 
 ```{r}
-selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE)
-selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE)
-selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A5 (300s+CT) [Pa]'), multiple = FALSE)
+selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = unique(subset_data$Muestra))
+selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = unique(subset_data$Activacion))
+selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A5 (300s+CT) [Pa]'), multiple = FALSE, selected ='A10 (600s+CT) [Pa]')
+selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura'), multiple = FALSE,selected ='scatter')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
-                 start = NULL, end = NULL, 
+                 start = as.Date("2022-10-01"), end = Sys.Date(), 
                  format = "yyyy-mm-dd", separator = " to ")
+
+checkboxInput("test_Pruptura", "Test Pruptura", FALSE)
+min_val <- min(subset_data$`Presion de desprendimiento [Pa]`,na.rm = TRUE)
+max_val <- max(subset_data$`Presion de desprendimiento [Pa]`,na.rm = TRUE)
+sliderInput("range_Pruptura", "Select a range of values:", min=min_val, max=max_val, value=c(min_val, max_val))
+
+
+
 ```
 
 Column {data-width=650}
@@ -61,6 +127,7 @@ Column {data-width=650}
 
 
  # Create reactive subset data
+# Este es el subset que se usa para hacer estadística de mediciones con Problemas
   reactive_my_data <- reactive({
     subset(my_data, 
            Muestra %in% input$values_muestra & 
@@ -68,17 +135,29 @@ Column {data-width=650}
            Fecha >= input$date_range[1] & Fecha <= input$date_range[2])
   })
 
-
+# Este es el subset de las mediciones sin problemas que se usan para todos los plots del panel principal
 reactive_subset_data <- reactive({
-    subset(subset_data, 
+  if(input$test_Pruptura)  
+  subset(subset_data, 
            Muestra %in% input$values_muestra & 
            Activacion %in% input$values_activacion & 
-           Fecha >= input$date_range[1] & Fecha <= input$date_range[2])
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+             `Presion de desprendimiento [Pa]`>= input$range_Pruptura[1] & `Presion de desprendimiento [Pa]`<= input$range_Pruptura[2]
+           )
+  else
+     subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] 
+             
+           )
   })
+
+
 
   # Render scatter plot based on filtered data object and user's selected x, a, and color columns
   renderPlot({
-    my_plot(midata = reactive_subset_data(), x_col = "Prueba", a_col = input$value_amplitud, color_col = "Muestra",  shape_col = "Activacion")
+    my_plot(midata = reactive_subset_data(), x_col = "Prueba", a_col = input$value_amplitud, color_col = "Muestra",  shape_col = "Activacion",plot_type=input$plot_type)
   })
 
 
