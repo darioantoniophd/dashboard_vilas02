@@ -186,12 +186,12 @@ N <- c(nrow(N_prueba), nrow(N_muestra), nrow(N_rotrol), nrow(N_plasmaS), nrow(N_
 Variabilidad_A10 <- data.frame(cbind(Criterio, CV_promedio, N))
 
 #agregando los CV intra-muestra para cada muestra
-Criterio2 <- c("intra_plasmaPP", "intra_plasmaS", "intra_plasmaS_25", "intra_rotrolN", "intra_rotrolN_25", "intra_sangre", "intra_sangre_vieja", "promedio-intraMuestra", "promedio-intraPrueba", "promedio-intraPrueba_Rotrol", "promedio-intraPrueba_PlasmaS", "promedio-intraPrueba_Sangre", "promedio-intraPrueba_PlasmaPP")
+Criterio <- c("intra_plasmaPP", "intra_plasmaS", "intra_plasmaS_25", "intra_rotrolN", "intra_rotrolN_25", "intra_sangre", "intra_sangre_vieja", "promedio-intraMuestra", "promedio-intraPrueba", "promedio-intraPrueba_Rotrol", "promedio-intraPrueba_PlasmaS", "promedio-intraPrueba_Sangre", "promedio-intraPrueba_PlasmaPP")
 
-CV_promedio2 <- c(A10_intra_muestra$`CV %`, CV_promedio_intraMuestra, CV_promedio_intraPrueba, CV_promedio_intraPrueba_rotrol, CV_promedio_intraPrueba_plasmaS, CV_promedio_intraPrueba_sangre, CV_promedio_intraPrueba_plasmaPP)
+CV <- c(A10_intra_muestra$`CV %`, CV_promedio_intraMuestra, CV_promedio_intraPrueba, CV_promedio_intraPrueba_rotrol, CV_promedio_intraPrueba_plasmaS, CV_promedio_intraPrueba_sangre, CV_promedio_intraPrueba_plasmaPP)
 
-N2 <- c(A10_intra_muestra$N, nrow(N_muestra), nrow(N_prueba), nrow(N_rotrol), nrow(N_plasmaS), nrow(N_sangre), nrow(N_plasmaPP))
-Variabilidad_A10_2 <- data.frame(cbind(Criterio2, CV_promedio2, N2))
+N <- c(A10_intra_muestra$N, nrow(N_muestra), nrow(N_prueba), nrow(N_rotrol), nrow(N_plasmaS), nrow(N_sangre), nrow(N_plasmaPP))
+Variabilidad_A10_2 <- data.frame(cbind(Criterio, CV, N))
 ```
 
 ```{r}
