@@ -58,6 +58,8 @@ subset de la tabla para eliminar mediciones que no deben ser consideradas, segú
 #eliminamos las observaciones que NO se deben considerar en el análisis
 subset_data <- subset(my_data, `Problema`=="ninguno")
 
+subset_data <- subset(subset_data, `Capilar`=="Capi. CH")
+
 #eliminamos mediciones sin datos de A10
 subset_data <- subset_data[!is.na(subset_data$`A10 (600s+CT) [Pa]`), ]
 
