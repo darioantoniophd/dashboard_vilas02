@@ -60,6 +60,42 @@ my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   geom_text(data = N_data, aes(x = Prueba, y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
   geom_text(data = cv_data, aes(x = Prueba, y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
+  
+} else if (plot_type == "3_sigma_A_por_prueba"){
+  # boxplot with labels
+  # calculate CV values for each group
+  cv_data <- midata %>%
+  group_by(Prueba) %>%
+  summarise(promedio=mean(.data[[a_col]]),sigmax3 = sd(.data[[a_col]]),muestra=max(Muestra),activacion=max(Activacion))
+  
+  #para calcular el N de cada grupo/prueba
+  N_data <- midata %>%
+  count(Prueba, name = "N")
+  # plot boxplot with CV and N labels
+  
+circularise <- function(d, n=30){
+  angle <- seq(-pi, pi, length = n)
+  make_circle <- function(x,y,r,id, circle_color){
+    data.frame(x=x+r*cos(angle), y=y+r*sin(angle), id, circle_color)
+  }
+  lmat <- mapply(make_circle, id = seq_len(nrow(d)), 
+                x = 0, y=d[["promedio"]], r=d[["sigmax3"]],circle_color=d[["muestra"]], SIMPLIFY = FALSE)
+  do.call(rbind, lmat)
+}
+
+circles <- circularise(cv_data)
+
+p <- ggplot() + 
+  geom_point(data=cv_data, aes(x=0, y=promedio))
+
+p + geom_polygon(aes(x, y, group=id, fill=circle_color), data=circles) +
+    coord_fixed()
+
+
+  
+  
+  
+  
 }
   else if (plot_type == "boxplot_por_muestra"){
   
@@ -101,7 +137,7 @@ Column {.sidebar}
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = unique(subset_data$Muestra))
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = unique(subset_data$Activacion))
 selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A5 (300s+CT) [Pa]'), multiple = FALSE, selected ='A10 (600s+CT) [Pa]')
-selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura'), multiple = FALSE,selected ='scatter')
+selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','3_sigma_A_por_prueba'), multiple = FALSE,selected ='scatter')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
@@ -111,8 +147,12 @@ dateRangeInput("date_range", "Select date range:",
 checkboxInput("test_Pruptura", "Test Pruptura", FALSE)
 min_val <- min(subset_data$`Presion de desprendimiento [Pa]`,na.rm = TRUE)
 max_val <- max(subset_data$`Presion de desprendimiento [Pa]`,na.rm = TRUE)
-sliderInput("range_Pruptura", "Select a range of values:", min=min_val, max=max_val, value=c(min_val, max_val))
+sliderInput("range_Pruptura", "Select a range for Pruptura:", min=min_val, max=max_val, value=c(min_val, max_val))
 
+checkboxInput("test_deltaPmed", "Test deltaPmed", FALSE)
+min_val <- min(subset_data$deltaPmed,na.rm = TRUE)
+max_val <- max(subset_data$deltaPmed,na.rm = TRUE)
+sliderInput("range_deltaPmed", "Select a range of values:", min=min_val, max=max_val, value=c(min_val, max_val))
 
 
 ```
@@ -144,13 +184,20 @@ reactive_subset_data <- reactive({
            Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
              `Presion de desprendimiento [Pa]`>= input$range_Pruptura[1] & `Presion de desprendimiento [Pa]`<= input$range_Pruptura[2]
            )
+  else if(input$test_deltaPmed)
+   subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+             deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2]
+           )
   else
      subset(subset_data, 
            Muestra %in% input$values_muestra & 
            Activacion %in% input$values_activacion & 
            Fecha >= input$date_range[1] & Fecha <= input$date_range[2] 
-             
-           )
+          )
+  
   })
 
 
