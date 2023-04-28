@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Dashboard Vilas 02"
 output: flexdashboard::flex_dashboard
 orientation: columns
 vertical_layout: fill
@@ -61,12 +61,12 @@ my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
   geom_text(data = N_data, aes(x = Prueba, y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
   geom_text(data = cv_data, aes(x = Prueba, y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
   
-} else if (plot_type == "3_sigma_A_por_prueba"){
+} else if (plot_type == "sigma_A_por_prueba"){
   # boxplot with labels
   # calculate CV values for each group
   cv_data <- midata %>%
   group_by(Prueba) %>%
-  summarise(promedio=mean(.data[[a_col]]),sigmax3 = sd(.data[[a_col]]),muestra=max(Muestra),activacion=max(Activacion))
+  summarise(promedio=mean(.data[[a_col]]),sigma = sd(.data[[a_col]]),muestra=max(Muestra),activacion=max(Activacion))
   
   #para calcular el N de cada grupo/prueba
   N_data <- midata %>%
@@ -79,7 +79,7 @@ circularise <- function(d, n=30){
     data.frame(x=x+r*cos(angle), y=y+r*sin(angle), id, circle_color)
   }
   lmat <- mapply(make_circle, id = seq_len(nrow(d)), 
-                x = 0, y=d[["promedio"]], r=d[["sigmax3"]],circle_color=d[["muestra"]], SIMPLIFY = FALSE)
+                x = 0, y=d[["promedio"]], r=d[["sigma"]],circle_color=d[["muestra"]], SIMPLIFY = FALSE)
   do.call(rbind, lmat)
 }
 
@@ -91,11 +91,6 @@ p <- ggplot() +
 p + geom_polygon(aes(x, y, group=id, fill=circle_color), data=circles) +
     coord_fixed()
 
-
-  
-  
-  
-  
 }
   else if (plot_type == "boxplot_por_muestra"){
   
@@ -130,6 +125,8 @@ ggplot(midata, aes(x = Muestra, y = .data[[a_col]])) +
 
 ```
 
+# Plots
+
 Column {.sidebar}
 --------------------------------------------------
 
@@ -137,7 +134,7 @@ Column {.sidebar}
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = unique(subset_data$Muestra))
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = unique(subset_data$Activacion))
 selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A5 (300s+CT) [Pa]'), multiple = FALSE, selected ='A10 (600s+CT) [Pa]')
-selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','3_sigma_A_por_prueba'), multiple = FALSE,selected ='scatter')
+selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','sigma_A_por_prueba'), multiple = FALSE,selected ='scatter')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
@@ -152,7 +149,7 @@ sliderInput("range_Pruptura", "Select a range for Pruptura:", min=min_val, max=m
 checkboxInput("test_deltaPmed", "Test deltaPmed", FALSE)
 min_val <- min(subset_data$deltaPmed,na.rm = TRUE)
 max_val <- max(subset_data$deltaPmed,na.rm = TRUE)
-sliderInput("range_deltaPmed", "Select a range of values:", min=min_val, max=max_val, value=c(min_val, max_val))
+sliderInput("range_deltaPmed", "Select a range for deltaPmed:", min=min_val, max=max_val, value=c(min_val, max_val))
 
 
 ```
@@ -269,4 +266,20 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
             position = position_stack(vjust = 0.5))
 })  
 ```
+
+# Conclusiones
+
+### Problemas principales
+* No podemos diferenciar muestras normales y patológicas (ROTROL N vs. Plasma Siemens) debido a que el error es comparable a la diferencia entre los promedios de A10. Ver en dashboard “sigma_A_por_prueba”.
+* El error inter día es mayor que el intra día. Ver en dashboard “boxplot_por_prueba”. Esto muy notable en ROTROL N.
+
+### Observaciones más relevantes
+* Los problemas principales son más notables en ROTROL N y sangre que en Plasma Siemens. Esto hace suponer que a mayor A10 el error es mayor.
+* Hay una correlación positiva entre A10 y deltaPmed. En Rotrol y Sangre los valores de A10 anormalmente altos se corresponden con deltaPmed menores a 200Pa. Ver dashboard scatter_A_vs_Pmed.
+* En las mediciones de sangre con problemas más del 40% no coagularon, versus las de ROTROL con problemas en las que 5% no coagularon. El n<20 es bajo. 
+
+### Observaciones secundarias
+* No vemos relación entre el error y la presión a canal cerrado (script R plotParametros)
+* El error en A10 medido intra cartucho no es menor al inter cartucho. El error en A10 no está causado por diferencias entre cartuchos.
+* La presión de ruptura tiene una correlación positiva con el A10. Ver dashboard scatter_A_vs_Pruptura.
 
