@@ -183,7 +183,7 @@ ggplot(subset_data, aes(x = subset_data$`Nro Cartucho`, y = `A10 (600s+CT) [Pa]`
 
 
 
-Plot A10 vs prueba, color según rango de QC1 (tres rangos)
+PRESIÓN A CANAL CERRADO. Plot A10 vs prueba, coloreado según 3 rangos de QC1
 ```{r}
 QC1_10 <- subset_data[subset_data$`Canal cerrado Promedio QC1 [Pa]`< 10000, ]
  
