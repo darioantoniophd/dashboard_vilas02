@@ -12,11 +12,9 @@ gs4_auth(email=TRUE)
 
 ```
 
-Cargar la tabla VL2-R-01-Registro de mediciones
+
 ```{r}
-options(
-  date.format = "%d/%m/%y",
-  stringsAsFactors = FALSE)
+options(date.format = "%d/%m/%y",  stringsAsFactors = FALSE)
 
 # Get the sheet ID and sheet name
 sheet_id <- "1YQ2MJrwRLGbripDfV4bi1mVEYpWzZeyiMzI3uBSGTJw"
@@ -33,29 +31,9 @@ my_data_vilas01$Fecha <- as.Date(my_data_vilas01$Fecha)
 my_data_vilas01$Pmed_base = as.numeric(as.character(my_data_vilas01$Pmedia))
 my_data_vilas01$Pmed_A10 = as.numeric(as.character(my_data_vilas01$Pmax))
 my_data_vilas01$`A10 (600s+CT) [Pa]` = as.numeric(as.character(my_data_vilas01$`A10 [Pa]`))
-#my_data_vilas01$`A1 (60s+CT) [Pa]` = as.numeric(as.character(my_data_vilas01$`A1 (60s+CT) [Pa]`))
-#my_data_vilas01$`A5 (300s+CT) [Pa]` = as.numeric(as.character(my_data_vilas01$`A5 (300s+CT) [Pa]`))
-#my_data_vilas01$`A20 (1200s+CT) [Pa]` = as.numeric(as.character(my_data_vilas01$`A20 (1200s+CT) [Pa]`))
-#my_data_vilas01$`CT [seg]` = as.numeric(as.character(my_data_vilas01$`CT [seg]`))
-#my_data_vilas01$Alpha <- as.numeric(as.character(my_data_vilas01$Alpha))
-#my_data_vilas01$`Nro Cartucho` <- as.character(my_data_vilas01$`Nro Cartucho`)
-#my_data_vilas01$`MCF ??` = as.numeric(as.character(my_data_vilas01$`MCF ??`))
-#my_data_vilas01$`Presion de desprendimiento [Pa]` = as.numeric(as.character(my_data_vilas01$`Presion de desprendimiento [Pa]`))
-#my_data_vilas01$`CT [seg]` = as.numeric(as.character(my_data_vilas01$`CT [seg]`))
-
-# creamos nueva columna deltaPmed con el resultado de la diferencia entre dos columnas
-my_data_vilas01$deltaPmed <- my_data_vilas01$Pmed_A10 - my_data_vilas01$Pmed_base
-
-```
-
-subset de la tabla para eliminar mediciones que no deben ser consideradas, según el criterio del análisis
-```{r}
-#------ subset de la tabla para eliminar mediciones que no deben ser consideradas, según el criterio del análisis
 
 #eliminamos las observaciones que NO se deben considerar en el análisis
 subset_data_vilas01 <- subset(my_data_vilas01, `Problema`=="ninguno")
-
-#subset_data_vilas01 <- subset(subset_data_vilas01, `Capilar`=="Capi. CH")
 
 #eliminamos mediciones sin datos de A10
 subset_data_vilas01 <- subset_data_vilas01[!is.na(subset_data_vilas01$`A10 (600s+CT) [Pa]`), ]
@@ -63,14 +41,4 @@ subset_data_vilas01 <- subset_data_vilas01[!is.na(subset_data_vilas01$`A10 (600s
 #guardar el dataset en el disco
 save(subset_data_vilas01, file = "subset_data_vilas01.Rdata")
 save(my_data_vilas01, file = "my_data_vilas01.Rdata")
-
-# Discard NA's in subset_data_vilas01$`Comportamiento curva Pmed`
-#my_data_vilas01 <- my_data_vilas01[!is.na(my_data_vilas01$`Comportamiento curva Pmed`), ]
-
-# Discard NA's in subset_data_vilas01$`Comportamiento curva Pmed`
-#my_data_vilas01 <- subset(my_data_vilas01, `Comportamiento curva Pmed`!="NA")
-
-# Discard cisnes in subset_data_vilas01$`Comportamiento curva Pmed`
-#my_data_vilas01 <- subset(my_data_vilas01, `Comportamiento curva Pmed`!="cisne")
 ```
-
