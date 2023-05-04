@@ -67,7 +67,7 @@ subset_data <- subset_data[!is.na(subset_data$`A10 (600s+CT) [Pa]`), ]
 my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
  
 # Read the JPEG image
-img <- readJPEG("felici.jpeg")
+# img <- readJPEG("felici.jpeg")
 
   
  if (plot_type == "scatter_A_vs_Prueba") {
@@ -76,9 +76,9 @@ img <- readJPEG("felici.jpeg")
     geom_point(size= 3) +
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
     theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) 
    # Add the image layer
-    annotation_raster(img, xmin = 10, xmax = 30, ymin = 1000, ymax = 1400)
+   # annotation_raster(img, xmin = 10, xmax = 30, ymin = 1000, ymax = 1400)
 
  } else if (plot_type == "scatter_A_vs_Pmed"){
     ggplot(midata, aes(x = deltaPmed, y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
