@@ -38,7 +38,7 @@ my_data$Fecha <- as.Date(my_data$Fecha)
 my_data$Pmed_base = as.numeric(as.character(my_data$Pmed_base))
 my_data$Pmed_A10 = as.numeric(as.character(my_data$Pmed_A10))
 my_data$`A10 (600s+CT) [Pa]` = as.numeric(as.character(my_data$`A10 (600s+CT) [Pa]`))
-my_data$`A10R` = 100/(1+1800/my_data$`A10 (600s+CT) [Pa]`)
+my_data$`A10R` = 100/(1+1600/my_data$`A10 (600s+CT) [Pa]`)
 my_data$`A1 (60s+CT) [Pa]` = as.numeric(as.character(my_data$`A1 (60s+CT) [Pa]`))
 my_data$`A5 (300s+CT) [Pa]` = as.numeric(as.character(my_data$`A5 (300s+CT) [Pa]`))
 my_data$`A20 (1200s+CT) [Pa]` = as.numeric(as.character(my_data$`A20 (1200s+CT) [Pa]`))
@@ -48,6 +48,8 @@ my_data$`Nro Cartucho` <- as.character(my_data$`Nro Cartucho`)
 my_data$`MCF ??` = as.numeric(as.character(my_data$`MCF ??`))
 my_data$`Presion de desprendimiento [Pa]` = as.numeric(as.character(my_data$`Presion de desprendimiento [Pa]`))
 my_data$`CT [seg]` = as.numeric(as.character(my_data$`CT [seg]`))
+my_data$Frecuencia_Hz = as.numeric(as.character(my_data$Frecuencia_Hz))
+
 
 # Create new column deltaPmed 
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
@@ -167,6 +169,7 @@ Column {.sidebar}
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = unique(subset_data$Muestra))
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = unique(subset_data$Activacion))
 selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A10R','A5 (300s+CT) [Pa]'), multiple = FALSE, selected ='A10 (600s+CT) [Pa]')
+selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia_Hz), multiple = TRUE, selected = unique(subset_data$Frecuencia_Hz))
 selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','sigma_A_por_prueba'), multiple = FALSE,selected ='scatter')
 
 # Date range input widgets
@@ -225,12 +228,12 @@ reactive_subset_data <- reactive({
      subset(subset_data, 
            Muestra %in% input$values_muestra & 
            Activacion %in% input$values_activacion & 
-           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+           Frecuencia_Hz  %in% input$values_freq
+           
           )
   
   })
-
-
 
   # Render scatter plot based on filtered data object and user's selected x, a, and color columns
   renderPlot({
