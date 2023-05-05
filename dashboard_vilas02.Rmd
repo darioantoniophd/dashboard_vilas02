@@ -11,7 +11,7 @@ library(flexdashboard)
 library(dplyr)
 library(ggplot2)
 
-library(jpeg)
+#library(jpeg)
 
 ```
 
@@ -80,6 +80,13 @@ my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
    # Add the image layer
    # annotation_raster(img, xmin = 10, xmax = 30, ymin = 1000, ymax = 1400)
 
+} else if (plot_type == "scatter_A_vs_Medicion"){
+    ggplot(midata, aes(x = Medicion, y = .data[[a_col]], color = Prueba, shape = .data[[shape_col]])) +
+    geom_point(size= 3) +
+    labs(title = paste0(a_col, " vs. ", "Medicion"), x = "Medicion", y = a_col, color = color_col, shape=shape_col)+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+  
  } else if (plot_type == "scatter_A_vs_Pmed"){
     ggplot(midata, aes(x = deltaPmed, y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
     geom_point(size= 3) +
@@ -179,7 +186,7 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = unique(subset_data$Activacion))
 selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A10R','A5 (300s+CT) [Pa]'), multiple = FALSE, selected ='A10 (600s+CT) [Pa]')
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia_Hz), multiple = TRUE, selected = unique(subset_data$Frecuencia_Hz))
-selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','sigma_A_por_prueba'), multiple = FALSE,selected ='scatter')
+selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','scatter_A_vs_Medicion','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','sigma_A_por_prueba'), multiple = FALSE,selected ='scatter')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
