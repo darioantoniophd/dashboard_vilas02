@@ -336,3 +336,11 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * El error en A10 medido intra cartucho no es menor al inter cartucho. El error en A10 no está causado por diferencias entre cartuchos.
 * La presión de ruptura tiene una correlación positiva con el A10. Ver dashboard scatter_A_vs_Pruptura.
 
+### Eventos en el desarrollo que afectan las mediciones
+* Día 14 -- 30/11/22 -- Mejora del dispensado
+* Dia 23 -- 13/02/23 -- Cambio de placa
+* Dia 34 -- 17/04/23 -- Mejoramos mezclado (se aumenta a 3 el # de mezclados)
+* Dia 38 -- 28/04/23 -- Versión de Firmware 2.0.17
+* Dia 42 -- 08/05/23 -- Se cambia la frecuencia a 1 Hz  (días previos se comparan frecuencias de 0,5 y 1 Hz)
+* Dia 46_jeringa -- 01/06/23 -- Se ajusta la válvula cartucho y se mejora la alineación del émbolo -- Mejora la Presión de base
+
