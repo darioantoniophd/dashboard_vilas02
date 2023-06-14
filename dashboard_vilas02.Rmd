@@ -30,7 +30,7 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 # Cargar la tabla VL2-R-01-Registro de mediciones
 # Get the sheet ID and sheet name
 sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
-sheet_name <- "01_Registro"
+sheet_name <- "03_Registro"
 # Set the range to read, starting from the fourth row
 range <- paste0(sheet_name, "!A4:AJ")
 # Read the sheet data into R as a data frame, using the fourth row as the column names
@@ -121,6 +121,12 @@ my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
     ggplot(midata, aes(x = Medicion, y = `Canal cerrado Promedio QC1 [Pa]`, color = .data[[color_col]], shape = .data[[shape_col]])) +
     geom_point(size= 3) +
     labs(title = paste0("Canal cerrado Promedio [Pa]", " vs. ", "Medicion"), x = "Medicion", y = "Canal cerrado", color = color_col, shape=shape_col)+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+} else if (plot_type == "canal_abierto_vs_medicion"){
+    ggplot(midata, aes(x = Medicion, y =  `Canal abierto Promedio QC2 [Pa]`, color = .data[[color_col]], shape = .data[[shape_col]])) +
+    geom_point(size= 3) +
+    labs(title = paste0("Canal abierto", " vs. ", "Medicion"), x = "Medicion", y = "Canal abierto", color = color_col, shape=shape_col)+
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 } else if (plot_type == "Amplitud_base_vs_medicion"){
@@ -221,7 +227,7 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = unique(subset_data$Activacion))
 selectInput("value_amplitud", "Select Amplitude:", choices = c('A1 (60s+CT) [Pa]','A10 (600s+CT) [Pa]','A10R','A5 (300s+CT) [Pa]'), multiple = FALSE, selected ='A10 (600s+CT) [Pa]')
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia_Hz), multiple = TRUE, selected = unique(subset_data$Frecuencia_Hz))
-selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','scatter_A_vs_Medicion','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','sigma_A_por_prueba','scatter_A_vs_canal_abierto','canal_cerrado_vs_medicion','scatter_A_vs_Amplitud_base','Amplitud_base_vs_medicion','Amplitud_base_vs_fecha'), multiple = FALSE,selected ='scatter')
+selectInput("plot_type", "Select plot type:", choices = c('scatter_A_vs_Prueba','scatter_A_vs_Medicion','boxplot_por_prueba','boxplot_por_muestra','scatter_A_vs_Pmed','scatter_A_vs_Pruptura','sigma_A_por_prueba','scatter_A_vs_canal_abierto','canal_cerrado_vs_medicion','scatter_A_vs_Amplitud_base','Amplitud_base_vs_medicion','Amplitud_base_vs_fecha','canal_abierto_vs_medicion'), multiple = FALSE,selected ='scatter')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 

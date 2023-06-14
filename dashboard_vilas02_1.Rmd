@@ -184,7 +184,7 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = c('EXTEM','INTEM'))
 
-selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = unique(subset_data$Frecuencia))
+selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 
@@ -192,9 +192,9 @@ selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10
 
 selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento'), multiple = FALSE, selected ='Prueba')
 
-selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Forma_curva','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
+selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Muestra')
 
-selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Forma_curva','Nro_Cartucho'), multiple = FALSE, selected ='Activacion')
+selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
