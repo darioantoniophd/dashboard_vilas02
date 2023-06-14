@@ -57,7 +57,6 @@ my_data$Frecuencia = as.numeric(as.character(my_data$Frecuencia_Hz))
 my_data$P_canal_abierto_QC2 = as.numeric(as.character(my_data$`Canal abierto Promedio QC2 [Pa]`))
 my_data$Medicion <- paste(my_data$Prueba,my_data$Medicion) 
 my_data$P_canal_cerrado_QC1 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC1 [Pa]`))
-my_data$Forma_curva <- as.character(my_data$`Forma curva amplitud cruda`)
 my_data$Activacion <- as.character(my_data$Activacion)
 my_data$Saltos_curva_pmed <- as.character(my_data$Saltos_curva_pmed)
 my_data$Picos_curva_pmed <- as.character(my_data$Picos_curva_pmed)
@@ -181,19 +180,12 @@ Column {.sidebar}
 
 ```{r}
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = c('ROTROL N','ROTROL P'))
-
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = c('EXTEM','INTEM'))
-
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
-
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
-
 selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
-
 selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento'), multiple = FALSE, selected ='Prueba')
-
 selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Muestra')
-
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
 # Date range input widgets
@@ -201,18 +193,17 @@ dateRangeInput("date_range", "Select date range:",
                  start = as.Date("2023-05-01"), end = Sys.Date(), 
                  format = "yyyy-mm-dd", separator = " to ")
 
+# Pruptura ranges
 checkboxInput("test_Pruptura", "Test Pruptura", FALSE)
 min_val <- min(subset_data$P_desprendimiento,na.rm = TRUE)
 max_val <- max(subset_data$P_desprendimiento,na.rm = TRUE)
 sliderInput("range_Pruptura", "Select a range for Pruptura:", min=min_val, max=max_val, value=c(min_val, max_val))
-```
 
-```{r}
+# deltaPmed ranes
 checkboxInput("test_deltaPmed", "Test deltaPmed", FALSE)
 min_val <- min(subset_data$deltaPmed,na.rm = TRUE)
 max_val <- max(subset_data$deltaPmed,na.rm = TRUE)
 sliderInput("range_deltaPmed", "Select a range for deltaPmed:", min=min_val, max=max_val, value=c(min_val, max_val))
-
 
 ```
 
@@ -223,41 +214,41 @@ Column {data-width=650}
 
 ```{r}
 
-
-
 # Create reactive subset data
 # Este es el subset que se usa para hacer estadística de mediciones con Problemas
   reactive_my_data <- reactive({
     subset(my_data, 
            Muestra %in% input$values_muestra & 
            Activacion %in% input$values_activacion & 
-           Fecha >= input$date_range[1] & Fecha <= input$date_range[2])
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+           Frecuencia_Hz  %in% input$values_freq)
   })
 
 # Este es el subset de las mediciones sin problemas que se usan para todos los plots del panel principal
+reactive_subset_data1 <- reactive({
+    subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+           Frecuencia_Hz  %in% input$values_freq)
+  })
 reactive_subset_data <- reactive({
-  if(input$test_Pruptura)  
-  subset(subset_data, 
-           Muestra %in% input$values_muestra & 
-           Activacion %in% input$values_activacion & 
-           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
-             `Presion de desprendimiento [Pa]`>= input$range_Pruptura[1] & `Presion de desprendimiento [Pa]`<= input$range_Pruptura[2]
-           )
+  if (input$test_Pruptura & input$test_deltaPmed)
+    subset(reactive_subset_data1(), P_desprendimiento >= input$range_Pruptura[1] & P_desprendimiento <= input$range_Pruptura[2] &
+            deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2] )
+  
+  else if(input$test_Pruptura)  
+    subset(reactive_subset_data1(), 
+           P_desprendimiento >= input$range_Pruptura[1] & P_desprendimiento <= input$range_Pruptura[2])
+  
   else if(input$test_deltaPmed)
-   subset(subset_data, 
-           Muestra %in% input$values_muestra & 
-           Activacion %in% input$values_activacion & 
-           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
-             deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2]
+   subset(reactive_subset_data1(), 
+           deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2]
            )
   else
-     subset(subset_data, 
-           Muestra %in% input$values_muestra & 
-           Activacion %in% input$values_activacion & 
-           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
-           Frecuencia_Hz  %in% input$values_freq
+     reactive_subset_data1()
            
-          )
+          
   
   })
 
