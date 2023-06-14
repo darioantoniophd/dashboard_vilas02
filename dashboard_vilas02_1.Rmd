@@ -1,0 +1,347 @@
+---
+title: "Dashboard Vilas 02"
+output: flexdashboard::flex_dashboard
+orientation: columns
+vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(ggplot2)
+
+#library(jpeg)
+
+```
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared
+# by all users of the dashboard
+
+# Load the googlesheets4 package
+library(googlesheets4)
+
+# Authenticate with Google Sheets (you may be prompted to sign in)
+gs4_auth(email=TRUE)
+
+options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
+
+# Cargar la tabla VL2-R-01-Registro de mediciones
+# Get the sheet ID and sheet name
+sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
+sheet_name <- "01_Registro"
+# Set the range to read, starting from the fourth row
+range <- paste0(sheet_name, "!A4:AJ")
+# Read the sheet data into R as a data frame, using the fourth row as the column names
+my_data <- read_sheet(sheet_id, sheet_name, range, col_names = TRUE)
+# convert columns  to numeric
+my_data$Fecha <- as.Date(my_data$Fecha)
+my_data$Pmed_base = as.numeric(as.character(my_data$Pmed_base))
+my_data$Pmed_A10 = as.numeric(as.character(my_data$Pmed_A10))
+my_data$Amplitud_base = as.numeric(as.character(my_data$Amplitud_base))
+my_data$A10 = as.numeric(as.character(my_data$`A10 (600s+CT) [Pa]`))
+
+#my_data$`A10 (600s+CT) [Pa]` = my_data$`A10 (600s+CT) [Pa]`+(800-600/12.5*my_data$Amplitud_base)
+my_data$A10R = 100/(1+1400/my_data$A10)
+my_data$A1 = as.numeric(as.character(my_data$`A1 (60s+CT) [Pa]`))
+my_data$A5 = as.numeric(as.character(my_data$`A5 (300s+CT) [Pa]`))
+my_data$A20 = as.numeric(as.character(my_data$`A20 (1200s+CT) [Pa]`))
+my_data$CT = as.numeric(as.character(my_data$`CT [seg]`))
+my_data$Alpha <- as.numeric(as.character(my_data$Alpha))
+my_data$Nro_Cartucho <- as.character(my_data$`Nro Cartucho`)
+
+my_data$MCF = as.numeric(as.character(my_data$`MCF ??`))
+my_data$P_desprendimiento = as.numeric(as.character(my_data$`Presion de desprendimiento [Pa]`))
+my_data$Frecuencia = as.numeric(as.character(my_data$Frecuencia_Hz))
+my_data$P_canal_abierto_QC2 = as.numeric(as.character(my_data$`Canal abierto Promedio QC2 [Pa]`))
+my_data$Medicion <- paste(my_data$Prueba,my_data$Medicion) 
+my_data$P_canal_cerrado_QC1 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC1 [Pa]`))
+my_data$Forma_curva <- as.character(my_data$`Forma curva amplitud cruda`)
+my_data$Activacion <- as.character(my_data$Activacion)
+my_data$Saltos_curva_pmed <- as.character(my_data$Saltos_curva_pmed)
+my_data$Picos_curva_pmed <- as.character(my_data$Picos_curva_pmed)
+
+# Create new column deltaPmed 
+my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
+#eliminamos las observaciones que NO se deben considerar en el análisis y sin datos en A10
+subset_data <- subset(my_data, `Problema`=="ninguno")
+subset_data <- subset_data[!is.na(subset_data$A10), ]
+
+#load(file = "subset_data.Rdata")
+#load(file = "my_data.Rdata")
+
+# Function that filters dataset midata where column Muestra takes values in values_muestra. Then plots specified column "a_col" versus specified column "x_col" of specified dataset "midata" using column "color_col" for color
+
+my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
+ 
+# Read the JPEG image
+# img <- readJPEG("felici.jpeg")
+
+ if (plot_type == "scatter") {
+   # Create scatter plot using ggplot2
+  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
+    geom_point(size= 3) +
+    labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) 
+   # Add the image layer
+   # annotation_raster(img, xmin = 10, xmax = 30, ymin = 1000, ymax = 1400)
+   
+} else if (plot_type == "boxplot"){
+  # boxplot with labels
+  # calculate CV values for each group
+  cv_data <- midata %>%
+  group_by(.data[[x_col]]) %>%
+  summarise(cv = round(100*sd(.data[[a_col]])/mean(.data[[a_col]]), 0))
+  #para calcular el N de cada grupo/prueba
+  N_data <- midata %>%
+  count(.data[[x_col]], name = "N")
+  # plot boxplot with CV and N labels
+  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]])) +
+  geom_boxplot() +
+  labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
+  
+} 
+  
+  else if (plot_type == "boxplot_sd"){
+  # boxplot with labels
+  # calculate CV values for each group
+ cv_data <- midata %>%
+  group_by(.data[[x_col]]) %>%
+  summarise(dcolor=max(.data[[color_col]]) ,mean = mean(.data[[a_col]]), sd = sd(.data[[a_col]]), cv = round(100 * sd / mean, 0))
+
+# Calculate the N of each group/practice
+N_data <- midata %>%
+  count(.data[[x_col]], name = "N")
+
+# Plot boxplot with CV and N labels
+ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]])) +
+  #geom_boxplot(outlier.shape = NA) +
+  geom_point(data = cv_data, aes(y = mean,color =dcolor), size = 3) +
+  
+  geom_segment(data = cv_data, aes(x = .data[[x_col]], xend=.data[[x_col]],  y = mean - sd, yend = mean + sd, color =dcolor ),
+                size = 1.5) +
+  
+  #geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "segment"), data = df)
+  
+  
+  
+  labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle = 55, size = 3, color = "blue", nudge_x = -0.2)
+  
+} 
+  
+  
+  
+  
+  else if (plot_type == "sigma_A"){
+  # boxplot with labels
+  # calculate CV values for each group
+  cv_data <- midata %>%
+  group_by(Prueba) %>%
+  summarise(promedio=mean(.data[[a_col]]),sigma = sd(.data[[a_col]]),muestra=max(Muestra),activacion=max(Activacion))
+  
+  #para calcular el N de cada grupo/prueba
+  N_data <- midata %>%
+  count(.data[[x_col]], name = "N")
+  
+        # This function creates a dataframe of points in a circle around a center point with radius and number of points determined by the input data
+        # d: input dataframe with columns for x and y coordinates, circle radius (r), and circle color (circle_color)  n: number of points around the circle (default = 30)
+        circularise <- function(d, n=30){
+          angle <- seq(-pi, pi, length = n)
+          make_circle <- function(x,y,r,id, circle_color){data.frame(x=x+r*cos(angle), y=y+r*sin(angle), id, circle_color)}
+          lmat <- mapply(make_circle, id = seq_len(nrow(d)), x = 0, y=d[["promedio"]], r=d[["sigma"]],circle_color=d[["muestra"]], SIMPLIFY = FALSE)
+          do.call(rbind, lmat)
+        }
+  
+  circles <- circularise(cv_data)
+  p <- ggplot() + geom_point(data=cv_data, aes(x=0, y=promedio))
+  p + geom_polygon(aes(x, y, group=id, fill=circle_color, alpha=0.5), data=circles) + coord_fixed()
+
+}
+  
+}
+  
+ 
+
+```
+
+# Plots
+
+Column {.sidebar}
+--------------------------------------------------
+
+```{r}
+selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = c('ROTROL N','ROTROL P'))
+
+selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = c('EXTEM','INTEM'))
+
+selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = unique(subset_data$Frecuencia))
+
+selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
+
+selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
+
+selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento'), multiple = FALSE, selected ='Prueba')
+
+selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Forma_curva','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
+
+selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Forma_curva','Nro_Cartucho'), multiple = FALSE, selected ='Activacion')
+
+# Date range input widgets
+dateRangeInput("date_range", "Select date range:", 
+                 start = as.Date("2023-05-01"), end = Sys.Date(), 
+                 format = "yyyy-mm-dd", separator = " to ")
+
+checkboxInput("test_Pruptura", "Test Pruptura", FALSE)
+min_val <- min(subset_data$P_desprendimiento,na.rm = TRUE)
+max_val <- max(subset_data$P_desprendimiento,na.rm = TRUE)
+sliderInput("range_Pruptura", "Select a range for Pruptura:", min=min_val, max=max_val, value=c(min_val, max_val))
+```
+
+```{r}
+checkboxInput("test_deltaPmed", "Test deltaPmed", FALSE)
+min_val <- min(subset_data$deltaPmed,na.rm = TRUE)
+max_val <- max(subset_data$deltaPmed,na.rm = TRUE)
+sliderInput("range_deltaPmed", "Select a range for deltaPmed:", min=min_val, max=max_val, value=c(min_val, max_val))
+
+
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+
+
+# Create reactive subset data
+# Este es el subset que se usa para hacer estadística de mediciones con Problemas
+  reactive_my_data <- reactive({
+    subset(my_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2])
+  })
+
+# Este es el subset de las mediciones sin problemas que se usan para todos los plots del panel principal
+reactive_subset_data <- reactive({
+  if(input$test_Pruptura)  
+  subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+             `Presion de desprendimiento [Pa]`>= input$range_Pruptura[1] & `Presion de desprendimiento [Pa]`<= input$range_Pruptura[2]
+           )
+  else if(input$test_deltaPmed)
+   subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+             deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2]
+           )
+  else
+     subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+           Frecuencia_Hz  %in% input$values_freq
+           
+          )
+  
+  })
+
+  # Render scatter plot based on filtered data object and user's selected x, a, and color columns
+  renderPlot({
+    my_plot(midata = reactive_subset_data(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
+  })
+
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+renderPlot({
+
+
+# Create a data frame with the count of each value in the "Problema" column
+problema_count <- data.frame(table(reactive_my_data()$Problema))
+
+# Add a column to indicate whether the value is "ninguno" or not
+problema_count$is_ninguno <- ifelse(problema_count$Var1 == "ninguno", "ninguno", "otro")
+
+# Summarize the counts by "ninguno" and "otro"
+problema_summary <- aggregate(Freq ~ is_ninguno, data = problema_count, sum)
+
+# Plot the summary using a stacked bar plot
+ggplot(problema_summary, aes(x = "", y = Freq, fill = is_ninguno)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  xlab("") +
+  ylab("Count") +
+  ggtitle("Count of rows with 'ninguno' vs other values in 'Problema' column") +
+  geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
+            position = position_stack(vjust = 0.5))
+})  
+  
+```
+
+### Chart C
+
+```{r}
+library(RColorBrewer)
+
+renderPlot({
+# Create a data frame with the count of each value in the "Problema" column
+problema_count <- data.frame(table(reactive_my_data()$Problema))
+
+# Remove the rows with "ninguno"
+problema_count <- problema_count[problema_count$Var1 != "ninguno", ]
+
+# Set the fill colors using the Paired color palette
+fill_colors <- brewer.pal(nrow(problema_count), "Paired")
+
+# Plot the counts of rows by value using a stacked bar plot with contrasting colors
+ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  xlab("") +
+  ylab("Count") +
+  ggtitle("Count of rows with values other than 'ninguno' in 'Problema' column, grouped by value") +
+  scale_fill_manual(values = fill_colors) +
+  geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
+            position = position_stack(vjust = 0.5))
+})  
+```
+
+# Conclusiones
+
+### Problemas principales
+* No podemos diferenciar muestras normales y patológicas (ROTROL N vs. Plasma Siemens) debido a que el error es comparable a la diferencia entre los promedios de A10. Ver en dashboard “sigma_A_por_prueba”.
+* El error inter día es mayor que el intra día. Ver en dashboard “boxplot_por_prueba”. Esto muy notable en ROTROL N.
+
+### Observaciones más relevantes
+* Los problemas principales son más notables en ROTROL N y sangre que en Plasma Siemens. Esto hace suponer que a mayor A10 el error es mayor.
+* Hay una correlación positiva entre A10 y deltaPmed. En Rotrol y Sangre los valores de A10 anormalmente altos se corresponden con deltaPmed menores a 200Pa. Ver dashboard scatter_A_vs_Pmed.
+* En las mediciones de sangre con problemas más del 40% no coagularon, versus las de ROTROL con problemas en las que 5% no coagularon. El n<20 es bajo. 
+
+### Observaciones secundarias
+* No vemos relación entre el error y la presión a canal cerrado (script R plotParametros)
+* El error en A10 medido intra cartucho no es menor al inter cartucho. El error en A10 no está causado por diferencias entre cartuchos.
+* La presión de ruptura tiene una correlación positiva con el A10. Ver dashboard scatter_A_vs_Pruptura.
+
