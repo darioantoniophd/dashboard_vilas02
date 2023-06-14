@@ -199,7 +199,7 @@ min_val <- min(subset_data$P_desprendimiento,na.rm = TRUE)
 max_val <- max(subset_data$P_desprendimiento,na.rm = TRUE)
 sliderInput("range_Pruptura", "Select a range for Pruptura:", min=min_val, max=max_val, value=c(min_val, max_val))
 
-# deltaPmed ranes
+# deltaPmed ranges
 checkboxInput("test_deltaPmed", "Test deltaPmed", FALSE)
 min_val <- min(subset_data$deltaPmed,na.rm = TRUE)
 max_val <- max(subset_data$deltaPmed,na.rm = TRUE)
