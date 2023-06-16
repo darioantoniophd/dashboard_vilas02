@@ -184,7 +184,7 @@ selectInput("values_activacion", "Select values for Activacion:", choices = uniq
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
-selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento'), multiple = FALSE, selected ='Prueba')
+selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base'), multiple = FALSE, selected ='Prueba')
 selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Muestra')
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
@@ -323,15 +323,16 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 # Conclusiones
 
 ### Problemas principales
-* No podemos diferenciar muestras normales y patológicas (ROTROL N vs. Plasma Siemens) debido a que el error es comparable a la diferencia entre los promedios de A10. Ver en dashboard “sigma_A_por_prueba”.
-* El error inter día es mayor que el intra día. Ver en dashboard “boxplot_por_prueba”. Esto muy notable en ROTROL N.
+* Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10.
+* La variabilidad de deltaPmed parece deberse a un control de temperatura insuficiente. Sin embargo uno esperaría que el CT tenga entonces una correlación con deltaPmed pero esto no se ve claramente en los datos. Hacer seguimiento y ver que pasa con deltaPmed y CT cuando se corrija el control de temperatura.
 
 ### Observaciones más relevantes
-* Los problemas principales son más notables en ROTROL N y sangre que en Plasma Siemens. Esto hace suponer que a mayor A10 el error es mayor.
-* Hay una correlación positiva entre A10 y deltaPmed. En Rotrol y Sangre los valores de A10 anormalmente altos se corresponden con deltaPmed menores a 200Pa. Ver dashboard scatter_A_vs_Pmed.
-* En las mediciones de sangre con problemas más del 40% no coagularon, versus las de ROTROL con problemas en las que 5% no coagularon. El n<20 es bajo. 
+* Si bien a partir de la medición 46 (mejora de mecánica) Pbase se mantiene en un valor promedio constante, su variabilidad es mayor que antes. Ver Pbase vs. Prueba en boxplot.
+* En las mediciones de sangre con problemas más del 40% no coagularon, versus las de ROTROL con problemas en las que 5% no coagularon. El n<20 es bajo. Hacer seguimiento de esto.
+* Detectamos que lo que impedía diferenciar muestras normales de patológicas eran defectos en la mecánica del equipo que lo descalibraban progresivamente. Esto se ve en el  descenso continuo de Pbase que correlaciona con un descenso en A10 para los distintos tipos de muestra. (Ver Pbase versus medición o vs fecha y A10 versus Pbase). Esto explica que la variación interdía fuera mayor que la intradía, especialmente en Rotrol N donde la correlación de A10 con Pbase es más pronunciada.
 
 ### Observaciones secundarias
+* Los problemas principales antes de la mejora del sistema mecánico (Pbase en descenso) son más notables en ROTROL N y sangre que en Plasma Siemens. Verificar si el problema mecánico tenía mayor efecto en el A10 de las muestras más rígidas o si la mayor variabilidad en muestras msás rígidas se mantiene a pesar de las mejoras en la mnecánica.
 * No vemos relación entre el error y la presión a canal cerrado (script R plotParametros)
 * El error en A10 medido intra cartucho no es menor al inter cartucho. El error en A10 no está causado por diferencias entre cartuchos.
 * La presión de ruptura tiene una correlación positiva con el A10. Ver dashboard scatter_A_vs_Pruptura.
