@@ -4,3 +4,5 @@
 .Ruserdata
 subset_data.Rdata
 my_data.Rdata
+plot_raw_data_one_dataset.nb.html
+subset_data.csv
