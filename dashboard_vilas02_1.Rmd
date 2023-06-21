@@ -30,7 +30,8 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 # Cargar la tabla VL2-R-01-Registro de mediciones
 # Get the sheet ID and sheet name
 sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
-sheet_name <- "01_Registro"
+#sheet_name <- "01_Registro"
+sheet_name <- "control_temp"
 # Set the range to read, starting from the fourth row
 range <- paste0(sheet_name, "!A4:AJ")
 # Read the sheet data into R as a data frame, using the fourth row as the column names
@@ -323,25 +324,27 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 # Conclusiones
 
 ### Problemas principales
-* Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10.
+* Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
 * El control de temperatura es insuficiente. El cartucho no alcanza la temperatura determinada.
 * La variabilidad en el deltaPmed podría deberse a variaciones en la temperatura del sistema.
 
 ### Observaciones más relevantes
-* El CT también podría tener una correlación con el deltaPmed, aunque esto no se ve claramente en los datos.
 * Si bien a partir de la medición 46 (mejora de mecánica) la amplitud de presión de base (Amplitud_base) se mantiene en un valor promedio constante, su variabilidad es mayor que antes (ver Amplitud_base vs. Prueba).
 * Se observó una correlación entre el descenso de la amplitud_base y el descenso en A10 para los distintos Rotroles. Esto indica que la incapacidad de diferenciar muestras normales de patológicas se debió a los defectos en la mecánica del equipo, que lo descalibraban progresivamente  (Ver Amplitud_base versus medición o vs fecha y A10 versus Amplitud_base). Además, esto explica que la variación interdía fuera mayor que la intradía, especialmente en Rotrol N donde la correlación de A10 con Amplitud_base es más pronunciada.
 * En las mediciones de sangre con problemas más del 40% no coagularon, versus las de ROTROL con problemas en las que 5% no coagularon. El n<20 es bajo.
 
 ### Observaciones secundarias
+* El CT depende de la temperatura pero deltaPmed depende de los cambios de temperatura durante la medición (con mucha mayor sensibilidad que el CT).
 * Los problemas principales antes de la mejora del sistema mecánico (Amplitud de presión de base en descenso) son más notables en ROTROL N y sangre que en Plasma Siemens. 
 * No vemos relación entre el error y la presión a canal cerrado (script R plotParametros)
 * El error en A10 medido intra cartucho no es menor al inter cartucho. El error en A10 no está causado por diferencias entre cartuchos.
 * La presión de ruptura tiene una correlación positiva con el A10. Ver dashboard scatter_A_vs_Pruptura.
 
 ### Planificación
-* Hacer seguimiento del deltaPmed y CT cuando se corrija el control de temperatura.
-* Evaluar el efecto de la mayor variabildiad de la presion de base sobre la repetibilidad
+* Hacer seguimiento del deltaPmed cuando se corrija el control de temperatura.
+* Evaluar si en condiciones más estables de temperatura se estabiliza el deltaPmed (sala limpia)
+* Verificar si con los ajustes en la mecánica se logra estabilidad en Pbase
+* Evaluar el efecto de la mayor variabilidiad de la presion de base sobre la repetibilidad
 * Medir sangre para aumentar el N y evaluar la variabilidad de esta muestra
 * Verificar si la mayor variabilidad en muestras más rígidas se mantiene a pesar de las mejoras en la mecánica.
 
@@ -352,4 +355,4 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * Dia 38 -- 28/04/23 -- Versión de Firmware 2.0.17
 * Dia 42 -- 08/05/23 -- Se cambia la frecuencia a 1 Hz  (días previos se comparan frecuencias de 0,5 y 1 Hz)
 * Dia 46_jeringa -- 01/06/23 -- Se ajusta la válvula cartucho y se mejora la alineación del émbolo -- Mejora la Presión de base
-
+* Día CT8_SL -- 20/06/23 -- Se lleva el Vilas a la sala limpia para medir en condiciones estables de temperatura
