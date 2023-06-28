@@ -6,7 +6,10 @@ vertical_layout: fill
 runtime: shiny
 ---
 
+
 ```{r setup, include=FALSE}
+# git clone --depth 1 https://github.com/dariobariloche/dashboard_vilas02
+
 library(flexdashboard)
 library(dplyr)
 library(ggplot2)
