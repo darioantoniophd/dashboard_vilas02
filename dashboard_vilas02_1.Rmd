@@ -30,8 +30,8 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 # Cargar la tabla VL2-R-01-Registro de mediciones
 # Get the sheet ID and sheet name
 sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
-#sheet_name <- "01_Registro"
-sheet_name <- "control_temp"
+#sheet_name <- "03_Registro"
+sheet_name <- "03_Registro"
 # Set the range to read, starting from the fourth row
 range <- paste0(sheet_name, "!A4:AJ")
 # Read the sheet data into R as a data frame, using the fourth row as the column names
@@ -113,7 +113,7 @@ my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
   # calculate CV values for each group
  cv_data <- midata %>%
   group_by(.data[[x_col]]) %>%
-  summarise(dcolor=max(.data[[color_col]]) ,mean = mean(.data[[a_col]]), sd = sd(.data[[a_col]]), cv = round(100 * sd / mean, 0))
+  summarise(dcolor=max(.data[[color_col]]) ,mean = mean(.data[[a_col]]), sd = sd(.data[[a_col]]), cv = 100 * sd / mean)
 
 # Calculate the N of each group/practice
 N_data <- midata %>%
@@ -129,13 +129,13 @@ ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_
   
   #geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "segment"), data = df)
   
-  
-  
   labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle = 55, size = 3, color = "blue", nudge_x = -0.2)
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = mean, label = paste0("", round(mean,0))), hjust = -1, size = 3, color = "black") +
+ 
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", round(cv,0), "%")), vjust = 1, angle = 55, size = 3, color = "blue", nudge_x = -0.2)
   
 } 
   
