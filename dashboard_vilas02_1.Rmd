@@ -3,6 +3,7 @@ title: "Dashboard Vilas 02"
 output: flexdashboard::flex_dashboard
 orientation: columns
 vertical_layout: fill
+smooth_scroll: true
 runtime: shiny
 ---
 
@@ -196,7 +197,7 @@ selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activac
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
-                 start = as.Date("2023-05-01"), end = Sys.Date(), 
+                 start = as.Date("2023-06-01"), end = Sys.Date(), 
                  format = "yyyy-mm-dd", separator = " to ")
 
 # Pruptura ranges
@@ -326,7 +327,8 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 })  
 ```
 
-# Conclusiones
+
+# Conclusiones  {.storyboard}
 
 ### Problemas principales
 * Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
@@ -361,3 +363,4 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * Dia 42 -- 08/05/23 -- Se cambia la frecuencia a 1 Hz  (días previos se comparan frecuencias de 0,5 y 1 Hz)
 * Dia 46_jeringa -- 01/06/23 -- Se ajusta la válvula cartucho y se mejora la alineación del émbolo -- Mejora la Presión de base
 * Día CT8_SL -- 20/06/23 -- Se lleva el Vilas a la sala limpia para medir en condiciones estables de temperatura
+* Día 50 -- 27/06/23 -- Se trae el Vilas al contenedor manteniendo la temperatura del ambiente baja para que sea estable
