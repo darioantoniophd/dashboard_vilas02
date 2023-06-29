@@ -13,6 +13,8 @@ runtime: shiny
 library(flexdashboard)
 library(dplyr)
 library(ggplot2)
+library(yaml)
+
 
 #library(jpeg)
 
@@ -24,7 +26,7 @@ library(ggplot2)
 
 # Load the googlesheets4 package
 library(googlesheets4)
-
+config = yaml.load_file("config.yml")
 # Authenticate with Google Sheets (you may be prompted to sign in)
 gs4_auth(email=TRUE)
 
@@ -32,11 +34,11 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 
 # Cargar la tabla VL2-R-01-Registro de mediciones
 # Get the sheet ID and sheet name
-sheet_id <- "1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo"
-#sheet_name <- "03_Registro"
-sheet_name <- "03_Registro"
+
+sheet_id <- config$sheet_id
+sheet_name <- config$sheet_name
 # Set the range to read, starting from the fourth row
-range <- paste0(sheet_name, "!A4:AJ")
+range <- paste0(sheet_name, config$range)
 # Read the sheet data into R as a data frame, using the fourth row as the column names
 my_data <- read_sheet(sheet_id, sheet_name, range, col_names = TRUE)
 # convert columns  to numeric
