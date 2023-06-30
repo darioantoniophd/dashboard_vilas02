@@ -9,7 +9,6 @@ runtime: shiny
 
 
 ```{r setup, include=FALSE}
-# git clone --depth 1 https://github.com/dariobariloche/dashboard_vilas02
 
 library(flexdashboard)
 library(dplyr)
@@ -27,7 +26,7 @@ library(yaml)
 
 # Load the googlesheets4 package
 library(googlesheets4)
-config = yaml.load_file("config.yml")
+config = yaml.load_file("/home/dario/Dropbox/MZP/desarrollo/vilas02_pruebas/R/vilas02git/config.yml")
 # Authenticate with Google Sheets (you may be prompted to sign in)
 gs4_auth(email=TRUE)
 
@@ -70,9 +69,30 @@ my_data$Picos_curva_pmed <- as.character(my_data$Picos_curva_pmed)
 
 # Create new column deltaPmed 
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
+
+my_data_QC <- my_data
+
+my_data_QC$Problema[my_data_QC$Pmed_base < config$pbase_min] <- 'QC_failed_Pbase'
+my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
+my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
+my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
+
+
+print(my_data_QC)
 #eliminamos las observaciones que NO se deben considerar en el análisis y sin datos en A10
-subset_data <- subset(my_data, `Problema`=="ninguno")
+subset_data <- subset(my_data, Problema=="ninguno")
 subset_data <- subset_data[!is.na(subset_data$A10), ]
+
+subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
+subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
+
+# reactive(
+#   if (input$aplicar_QC) {
+#     reactive_my_data()$Problema[reactive_my_data()$P_canal_cerrado_QC1 > config$qc1_min | abs(reactive_my_data()$deltaPmed) < config$delta_pmed_max | reactive_my_data()$Pmed_base > config$pbase_min] <- 'QC_failed'
+#   }
+#   
+# )
+
 
 #load(file = "subset_data.Rdata")
 #load(file = "my_data.Rdata")
@@ -200,17 +220,9 @@ dateRangeInput("date_range", "Select date range:",
                  start = as.Date("2023-06-01"), end = Sys.Date(), 
                  format = "yyyy-mm-dd", separator = " to ")
 
-# Pruptura ranges
-checkboxInput("test_Pruptura", "Test Pruptura", FALSE)
-min_val <- min(subset_data$P_desprendimiento,na.rm = TRUE)
-max_val <- max(subset_data$P_desprendimiento,na.rm = TRUE)
-sliderInput("range_Pruptura", "Select a range for Pruptura:", min=min_val, max=max_val, value=c(min_val, max_val))
+checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
 
-# deltaPmed ranges
-checkboxInput("test_deltaPmed", "Test deltaPmed", FALSE)
-min_val <- min(subset_data$deltaPmed,na.rm = TRUE)
-max_val <- max(subset_data$deltaPmed,na.rm = TRUE)
-sliderInput("range_deltaPmed", "Select a range for deltaPmed:", min=min_val, max=max_val, value=c(min_val, max_val))
+
 
 ```
 
@@ -224,40 +236,63 @@ Column {data-width=650}
 # Create reactive subset data
 # Este es el subset que se usa para hacer estadística de mediciones con Problemas
   reactive_my_data <- reactive({
-    subset(my_data, 
+    if (input$aplicar_QC) {     
+      subset(my_data_QC,
            Muestra %in% input$values_muestra & 
            Activacion %in% input$values_activacion & 
            Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
            Frecuencia_Hz  %in% input$values_freq)
-  })
+    }else{
+      subset(my_data,
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+           Frecuencia_Hz  %in% input$values_freq)
+    }
+     })
 
 # Este es el subset de las mediciones sin problemas que se usan para todos los plots del panel principal
-reactive_subset_data1 <- reactive({
-    subset(subset_data, 
+
+reactive_subset_data <- reactive({
+  if (input$aplicar_QC) {  
+  subset(subset_data_QC, 
            Muestra %in% input$values_muestra & 
            Activacion %in% input$values_activacion & 
            Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
            Frecuencia_Hz  %in% input$values_freq)
-  })
-reactive_subset_data <- reactive({
-  if (input$test_Pruptura & input$test_deltaPmed)
-    subset(reactive_subset_data1(), P_desprendimiento >= input$range_Pruptura[1] & P_desprendimiento <= input$range_Pruptura[2] &
-            deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2] )
-  
-  else if(input$test_Pruptura)  
-    subset(reactive_subset_data1(), 
-           P_desprendimiento >= input$range_Pruptura[1] & P_desprendimiento <= input$range_Pruptura[2])
-  
-  else if(input$test_deltaPmed)
-   subset(reactive_subset_data1(), 
-           deltaPmed>= input$range_deltaPmed[1] & deltaPmed<= input$range_deltaPmed[2]
-           )
-  else
-     reactive_subset_data1()
-           
-          
-  
-  })
+} else {
+ subset(subset_data, 
+           Muestra %in% input$values_muestra & 
+           Activacion %in% input$values_activacion & 
+           Fecha >= input$date_range[1] & Fecha <= input$date_range[2] &
+           Frecuencia_Hz  %in% input$values_freq) 
+  }
+})
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   # Render scatter plot based on filtered data object and user's selected x, a, and color columns
   renderPlot({

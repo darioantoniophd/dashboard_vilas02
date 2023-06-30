@@ -1,3 +1,7 @@
 sheet_id : '1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo'
 sheet_name : '03_Registro'
 range : '!A4:AJ'
+qc1_min : 17000
+delta_pmed_max : 300
+pbase_min : 15
+
