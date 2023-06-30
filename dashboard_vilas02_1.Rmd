@@ -26,7 +26,7 @@ library(yaml)
 
 # Load the googlesheets4 package
 library(googlesheets4)
-config = yaml.load_file("/home/dario/Dropbox/MZP/desarrollo/vilas02_pruebas/R/vilas02git/config.yml")
+config = yaml.load_file("config.yml")
 # Authenticate with Google Sheets (you may be prompted to sign in)
 gs4_auth(email=TRUE)
 
@@ -158,10 +158,13 @@ ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_
   labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = mean, label = paste0("", round(mean,0))), hjust = -1, size = 3, color = "black") +
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red", nudge_x = -0.2) +
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", round(sd,0))), vjust = 1, angle = 0, size = 3, color = "brown", nudge_x = -0.2)+
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", round(cv,0), "%")), vjust = 3, angle = 0, size = 3, color = "blue", nudge_x = -0.2) +
+  
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = mean, label = paste0("", round(mean,0))), hjust = -1, size = 3, color = "black") 
  
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", round(cv,0), "%")), vjust = 1, angle = 55, size = 3, color = "blue", nudge_x = -0.2)
+  
   
 } 
   
