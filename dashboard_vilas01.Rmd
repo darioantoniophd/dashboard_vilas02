@@ -41,7 +41,7 @@ my_data_vilas01$Pmed_A10 = as.numeric(as.character(my_data_vilas01$Pmax))
 my_data_vilas01$`A10 (600s+CT) [Pa]` = as.numeric(as.character(my_data_vilas01$`A10 [Pa]`))
 
 #eliminamos las observaciones que NO se deben considerar en el análisis
-subset_data_vilas01 <- subset(my_data_vilas01, `Problema`=="ninguno")
+subset_data_vilas01 <- subset(my_data_vilas01, `Problema`=="ninguno" | `Problema`=="IRREGULAR")
 
 #eliminamos mediciones sin datos de A10
 subset_data_vilas01 <- subset_data_vilas01[!is.na(subset_data_vilas01$`A10 (600s+CT) [Pa]`), ]

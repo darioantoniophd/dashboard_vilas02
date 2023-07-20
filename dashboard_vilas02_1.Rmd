@@ -49,7 +49,7 @@ my_data$Amplitud_base = as.numeric(as.character(my_data$Amplitud_base))
 my_data$A10 = as.numeric(as.character(my_data$`A10 (600s+CT) [Pa]`))
 
 #my_data$`A10 (600s+CT) [Pa]` = my_data$`A10 (600s+CT) [Pa]`+(800-600/12.5*my_data$Amplitud_base)
-my_data$A10R = 100/(1+1400/my_data$A10)
+my_data$A10R = 100/(1+2000/my_data$A10)
 my_data$A1 = as.numeric(as.character(my_data$`A1 (60s+CT) [Pa]`))
 my_data$A5 = as.numeric(as.character(my_data$`A5 (300s+CT) [Pa]`))
 my_data$A20 = as.numeric(as.character(my_data$`A20 (1200s+CT) [Pa]`))
@@ -64,8 +64,8 @@ my_data$P_canal_abierto_QC2 = as.numeric(as.character(my_data$`Canal abierto Pro
 my_data$Medicion <- paste(my_data$Prueba,my_data$Medicion) 
 my_data$P_canal_cerrado_QC1 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC1 [Pa]`))
 my_data$Activacion <- as.character(my_data$Activacion)
-my_data$Saltos_curva_pmed <- as.character(my_data$Saltos_curva_pmed)
-my_data$Picos_curva_pmed <- as.character(my_data$Picos_curva_pmed)
+my_data$Pasa_criterio_fase <- as.character(my_data$Pasa_criterio_fase)
+
 
 # Create new column deltaPmed 
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
@@ -77,8 +77,6 @@ my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delt
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 
-
-print(my_data_QC)
 #eliminamos las observaciones que NO se deben considerar en el análisis y sin datos en A10
 subset_data <- subset(my_data, Problema=="ninguno")
 subset_data <- subset_data[!is.na(subset_data$A10), ]
@@ -100,10 +98,12 @@ subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
 # Function that filters dataset midata where column Muestra takes values in values_muestra. Then plots specified column "a_col" versus specified column "x_col" of specified dataset "midata" using column "color_col" for color
 
 my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
- 
 # Read the JPEG image
 # img <- readJPEG("felici.jpeg")
-
+my_palette <- c("#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFFF00",
+                "#FFA500", "#800080", "#008000", "#000080", "#800000", "#008080",
+                "#FFC0CB", "#FF6347", "#00CED1", "#8B4513", "#2E8B57", "#DAA520",
+                "#9932CC", "#FF1493")
  if (plot_type == "scatter") {
    # Create scatter plot using ggplot2
   ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
@@ -111,6 +111,8 @@ my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) 
+  #  +scale_color_manual(values = my_palette)
+   
    # Add the image layer
    # annotation_raster(img, xmin = 10, xmax = 30, ymin = 1000, ymax = 1400)
    
@@ -209,18 +211,18 @@ Column {.sidebar}
 --------------------------------------------------
 
 ```{r}
-selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = c('ROTROL N','ROTROL P'))
+selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = c('EXTEM','INTEM'))
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
 selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10'), multiple = FALSE, selected ='Prueba')
-selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Muestra')
+selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed','Pasa_criterio_fase'), multiple = FALSE, selected ='Muestra')
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
-                 start = as.Date("2023-06-01"), end = Sys.Date(), 
+                 start = as.Date(config$date_from), end = Sys.Date(), 
                  format = "yyyy-mm-dd", separator = " to ")
 
 checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
@@ -271,31 +273,6 @@ reactive_subset_data <- reactive({
            Frecuencia_Hz  %in% input$values_freq) 
   }
 })
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   # Render scatter plot based on filtered data object and user's selected x, a, and color columns
   renderPlot({
@@ -402,3 +379,4 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * Dia 46_jeringa -- 01/06/23 -- Se ajusta la válvula cartucho y se mejora la alineación del émbolo -- Mejora la Presión de base
 * Día CT8_SL -- 20/06/23 -- Se lleva el Vilas a la sala limpia para medir en condiciones estables de temperatura
 * Día 50 -- 27/06/23 -- Se trae el Vilas al contenedor manteniendo la temperatura del ambiente baja para que sea estable
+* Día 66 -- 18/07/23 -- Se modifica el mezclado para dispensar cerca del CT: de 3 a 14 mezclados
