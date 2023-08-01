@@ -76,6 +76,7 @@ my_data_QC$Problema[my_data_QC$Pmed_base < config$pbase_min] <- 'QC_failed_Pbase
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
+my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 
 #eliminamos las observaciones que NO se deben considerar en el análisis y sin datos en A10
 subset_data <- subset(my_data, Problema=="ninguno")
