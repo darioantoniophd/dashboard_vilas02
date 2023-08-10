@@ -70,7 +70,11 @@ my_data$Pasa_criterio_fase <- as.character(my_data$Pasa_criterio_fase)
 # Create new column deltaPmed 
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
 
-my_data_QC <- my_data
+#eliminamos las observaciones que NO se deben considerar en el análisis y sin datos en A10
+subset_data <- subset(my_data, Problema=="ninguno")
+subset_data <- subset_data[!is.na(subset_data$A10), ]
+
+my_data_QC <- subset_data
 
 my_data_QC$Problema[my_data_QC$Pmed_base < config$pbase_min] <- 'QC_failed_Pbase'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
@@ -78,12 +82,8 @@ my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_c
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 
-#eliminamos las observaciones que NO se deben considerar en el análisis y sin datos en A10
-subset_data <- subset(my_data, Problema=="ninguno")
-subset_data <- subset_data[!is.na(subset_data$A10), ]
-
 subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
-subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
+#subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
 
 # reactive(
 #   if (input$aplicar_QC) {
@@ -213,7 +213,7 @@ Column {.sidebar}
 
 ```{r}
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = config$muestra)
-selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = c('EXTEM','INTEM'))
+selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = config$activacion)
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
