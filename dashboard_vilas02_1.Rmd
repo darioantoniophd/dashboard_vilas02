@@ -170,10 +170,7 @@ ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_
   
   
 } 
-  
-  
-  
-  
+
   else if (plot_type == "sigma_A"){
   # boxplot with labels
   # calculate CV values for each group
@@ -218,8 +215,8 @@ selectInput("values_freq", "Select values for Frequency:", choices = unique(subs
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
 selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10'), multiple = FALSE, selected ='Prueba')
-selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed','Pasa_criterio_fase'), multiple = FALSE, selected ='Muestra')
-selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Saltos_curva_pmed','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
+selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase'), multiple = FALSE, selected ='Muestra')
+selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
 # Date range input widgets
 dateRangeInput("date_range", "Select date range:", 
@@ -228,7 +225,7 @@ dateRangeInput("date_range", "Select date range:",
 
 checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
 
-
+actionButton("save_button", "Save Selection")
 
 ```
 
@@ -281,6 +278,13 @@ reactive_subset_data <- reactive({
   })
 
 
+# Update the configuration and save to YAML when Save button is clicked
+observeEvent(input$save_button, {
+  config$muestra <- input$values_muestra
+  config$date_from <- input$date_range[1]
+  config$activacion <- input$values_activacion
+  write_yaml(config, file = "config.yml")
+})
 
 ```
 
