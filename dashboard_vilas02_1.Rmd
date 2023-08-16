@@ -76,7 +76,7 @@ subset_data <- subset_data[!is.na(subset_data$A10), ]
 
 my_data_QC <- subset_data
 
-my_data_QC$Problema[my_data_QC$Pmed_base < config$pbase_min] <- 'QC_failed_Pbase'
+my_data_QC$Problema[my_data_QC$Amplitud_base < config$pbase_min] <- 'QC_failed_Pbase'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
@@ -276,7 +276,6 @@ reactive_subset_data <- reactive({
   renderPlot({
     my_plot(midata = reactive_subset_data(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
   })
-
 
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
