@@ -63,6 +63,7 @@ my_data$Frecuencia = as.numeric(as.character(my_data$Frecuencia_Hz))
 my_data$P_canal_abierto_QC2 = as.numeric(as.character(my_data$`Canal abierto Promedio QC2 [Pa]`))
 my_data$Medicion <- paste(my_data$Prueba,my_data$Medicion) 
 my_data$P_canal_cerrado_QC1 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC1 [Pa]`))
+my_data$P_canal_cerrado_QC3 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC3 [Pa]`))
 my_data$Activacion <- as.character(my_data$Activacion)
 my_data$Pasa_criterio_fase <- as.character(my_data$Pasa_criterio_fase)
 
@@ -81,8 +82,8 @@ my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delt
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
-
 subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
+
 #subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
 
 # reactive(
@@ -213,8 +214,8 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = config$activacion)
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
-selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
-selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10'), multiple = FALSE, selected ='Prueba')
+selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_abierto_QC3','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
+selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_abierto_QC3','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10'), multiple = FALSE, selected ='Prueba')
 selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase'), multiple = FALSE, selected ='Muestra')
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
@@ -384,3 +385,4 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * Día CT8_SL -- 20/06/23 -- Se lleva el Vilas a la sala limpia para medir en condiciones estables de temperatura
 * Día 50 -- 27/06/23 -- Se trae el Vilas al contenedor manteniendo la temperatura del ambiente baja para que sea estable
 * Día 66 -- 18/07/23 -- Se modifica el mezclado para dispensar cerca del CT: de 3 a 14 mezclados
+* Día 88 -- 04/09/2023 -- Se comienza a medir con mayor cantidad de carrier en el reservorio (llegó el FC770 importado)
