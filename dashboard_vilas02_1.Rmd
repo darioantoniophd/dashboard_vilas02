@@ -64,6 +64,7 @@ my_data$P_canal_abierto_QC2 = as.numeric(as.character(my_data$`Canal abierto Pro
 my_data$Medicion <- paste(my_data$Prueba,my_data$Medicion) 
 my_data$P_canal_cerrado_QC1 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC1 [Pa]`))
 my_data$P_canal_cerrado_QC3 = as.numeric(as.character(my_data$`Canal cerrado Promedio QC3 [Pa]`))
+my_data$QC3minusQC1 = my_data$P_canal_cerrado_QC3-my_data$P_canal_cerrado_QC1
 my_data$Activacion <- as.character(my_data$Activacion)
 my_data$Pasa_criterio_fase <- as.character(my_data$Pasa_criterio_fase)
 
@@ -214,8 +215,8 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = config$activacion)
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
-selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','P_canal_cerrado_QC3','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
-selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','P_canal_cerrado_QC3','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10'), multiple = FALSE, selected ='Prueba')
+selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha'), multiple = FALSE, selected ='A10')
+selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10'), multiple = FALSE, selected ='Prueba')
 selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase'), multiple = FALSE, selected ='Muestra')
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
