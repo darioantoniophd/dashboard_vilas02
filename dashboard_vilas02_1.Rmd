@@ -83,6 +83,8 @@ my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delt
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
+my_data_QC$Problema[abs(my_data_QC$QC3minusQC1) > config$QC3minusQC1max] <- 'QC3minusQC1_Alto'
+
 subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
 
 #subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
