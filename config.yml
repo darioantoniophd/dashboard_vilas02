@@ -6,13 +6,8 @@ QC3minusQC1max: 100000
 delta_pmed_max: 400
 pbase_min: 15
 date_from: 19556.0
-muestra:
-- ROTROL N
-- ROTROL N VIEJO
-- ROTROL N DESC
-- ROTROL P
-- SANGRE
-- SANGRE VIEJA
+deltaTamb_max: 0.25
+muestra: ROTROL N DESC
 activacion:
 - in-tem
 - aPTTest W
