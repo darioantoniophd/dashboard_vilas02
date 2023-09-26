@@ -1,13 +1,15 @@
 sheet_id: 1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo
 sheet_name: 03_Registro
-range: '!A4:AP'
+range: '!A4:AQ'
 qc1_min: 16500
-QC3minusQC1max: 100000
+QC3minusQC1max: 1000
 delta_pmed_max: 400
 pbase_min: 15
 date_from: 19556.0
-deltaTamb_max: 0.25
-muestra: ROTROL N DESC
+deltaTamb_max: 0.20
+muestra:
+- ROTROL N DESC
+- ROTROL N
 activacion:
 - in-tem
 - aPTTest W

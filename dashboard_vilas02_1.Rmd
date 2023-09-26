@@ -70,6 +70,7 @@ my_data$Pasa_criterio_fase <- as.character(my_data$Pasa_criterio_fase)
 my_data$Tamb_i = as.numeric(as.character(my_data$Tamb_i))
 my_data$Tamb_f = as.numeric(as.character(my_data$Tamb_f))
 my_data$deltaTamb = my_data$Tamb_f-my_data$Tamb_i
+my_data$Resultado <- as.character(my_data$Resultado)
 
 # Create new column deltaPmed 
 my_data$deltaPmed <- my_data$Pmed_A10 - my_data$Pmed_base
@@ -88,6 +89,11 @@ my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 my_data_QC$Problema[abs(my_data_QC$QC3minusQC1) > config$QC3minusQC1max] <- 'QC3minusQC1_Alto'
 my_data_QC$Problema[abs(my_data_QC$deltaTamb) > config$deltaTamb_max] <- 'deltaTamb_Alto'
 
+#subset_data$Resultado2 <- subset_data$Resultado
+subset_data$Resultado[my_data_QC$Problema !=  'ninguno' & my_data_QC$Resultado == 'Buena'] <- 'Falso_negativo_QC'
+subset_data$Resultado[my_data_QC$Problema ==  'ninguno' & my_data_QC$Resultado == 'Mala'] <- 'Falso_positivo_QC'
+
+
 subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
 
 #subset_data_QC <- subset_data_QC[!is.na(subset_data_QC$A10), ]
@@ -98,7 +104,6 @@ subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
 #   }
 #   
 # )
-
 
 #load(file = "subset_data.Rdata")
 #load(file = "my_data.Rdata")
@@ -222,7 +227,7 @@ selectInput("values_freq", "Select values for Frequency:", choices = unique(subs
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha','Tamb_i','Tamb_f','deltaTamb'), multiple = FALSE, selected ='A10')
 selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10','Tamb_i','Tamb_f','deltaTamb'), multiple = FALSE, selected ='Prueba')
-selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase'), multiple = FALSE, selected ='Muestra')
+selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado'), multiple = FALSE, selected ='Muestra')
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
 # Date range input widgets
