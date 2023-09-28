@@ -5,11 +5,12 @@ qc1_min: 16500
 QC3minusQC1max: 1000
 delta_pmed_max: 400
 pbase_min: 15
-date_from: 19556.0
-deltaTamb_max: 0.20
+date_from: 19626.0
+deltaTz_max: 0.25
 muestra:
-- ROTROL N DESC
 - ROTROL N
+- ROTROL N DESC
+- PLASMA SIEMENS
 activacion:
 - in-tem
 - aPTTest W

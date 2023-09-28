@@ -67,9 +67,9 @@ my_data$P_canal_cerrado_QC3 = as.numeric(as.character(my_data$`Canal cerrado Pro
 my_data$QC3minusQC1 = my_data$P_canal_cerrado_QC3-my_data$P_canal_cerrado_QC1
 my_data$Activacion <- as.character(my_data$Activacion)
 my_data$Pasa_criterio_fase <- as.character(my_data$Pasa_criterio_fase)
-my_data$Tamb_i = as.numeric(as.character(my_data$Tamb_i))
-my_data$Tamb_f = as.numeric(as.character(my_data$Tamb_f))
-my_data$deltaTamb = my_data$Tamb_f-my_data$Tamb_i
+my_data$Tz_i = as.numeric(as.character(my_data$Tz_i))
+my_data$Tz_A10f = as.numeric(as.character(my_data$Tz_A10))
+my_data$deltaTz = my_data$Tz_A10-my_data$Tz_i
 my_data$Resultado <- as.character(my_data$Resultado)
 
 # Create new column deltaPmed 
@@ -87,7 +87,7 @@ my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_c
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 my_data_QC$Problema[abs(my_data_QC$QC3minusQC1) > config$QC3minusQC1max] <- 'QC3minusQC1_Alto'
-my_data_QC$Problema[abs(my_data_QC$deltaTamb) > config$deltaTamb_max] <- 'deltaTamb_Alto'
+my_data_QC$Problema[abs(my_data_QC$deltaTz) > config$deltaTz_max] <- 'deltaTz_Alto'
 
 #subset_data$Resultado2 <- subset_data$Resultado
 subset_data$Resultado[my_data_QC$Problema !=  'ninguno' & my_data_QC$Resultado == 'Buena'] <- 'Falso_negativo_QC'
@@ -225,8 +225,8 @@ selectInput("values_muestra", "Select values for Muestra:", choices = unique(sub
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = config$activacion)
 selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
-selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha','Tamb_i','Tamb_f','deltaTamb'), multiple = FALSE, selected ='A10')
-selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10','Tamb_i','Tamb_f','deltaTamb'), multiple = FALSE, selected ='Prueba')
+selectInput("y_var", "Select Y axis variable:", choices = c('A1','A5','A10','A10R','A20','MCF','CT','Amplitud_base','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','deltaPmed','Alpha','Tz_i','Tz_A10','deltaTz'), multiple = FALSE, selected ='A10')
+selectInput("x_var", "Select X axis variable:", choices = c('Prueba','Medicion','deltaPmed','Muestra','Forma_curva','Nro_Cartucho','Fecha','P_canal_abierto_QC2','QC3minusQC1','P_canal_cerrado_QC1','P_desprendimiento','Amplitud_base','CT','A10','Tz_i','Tz_A10','deltaTz'), multiple = FALSE, selected ='Prueba')
 selectInput("color_var", "Select color variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado'), multiple = FALSE, selected ='Muestra')
 selectInput("shape_var", "Select shape variable:", choices = c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed'), multiple = FALSE, selected ='Activacion')
 
@@ -360,6 +360,20 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 
 
 # Conclusiones  {.storyboard}
+please load the data
+### Eventos en el desarrollo que afectan las mediciones
+* Día 14 -- 30/11/22 -- Mejora del dispensado
+* Dia 23 -- 13/02/23 -- Cambio de placa
+* Dia 34 -- 17/04/23 -- Mejoramos mezclado (se aumenta a 3 el # de mezclados)
+* Dia 38 -- 28/04/23 -- Versión de Firmware 2.0.17
+* Dia 42 -- 08/05/23 -- Se cambia la frecuencia a 1 Hz  (días previos se comparan frecuencias de 0,5 y 1 Hz)
+* Dia 46_jeringa -- 01/06/23 -- Se ajusta la válvula cartucho y se mejora la alineación del émbolo -- Mejora la Presión de base
+* Día CT8_SL -- 20/06/23 -- Se lleva el Vilas a la sala limpia para medir en condiciones estables de temperatura
+* Día 50 -- 27/06/23 -- Se trae el Vilas al contenedor manteniendo la temperatura del ambiente baja para que sea estable
+* Día 66 -- 18/07/23 -- Se modifica el mezclado para dispensar cerca del CT: de 3 a 14 mezclados
+* Día 88 -- 04/09/2023 -- Se comienza a medir con mayor cantidad de carrier en el reservorio (llegó el FC770 importado)
+* Día 95 -- 13/09/2023 -- Error en toma de datos, cambio del acople luer, ajuste de embolo y cambio de motor de la pipeta
+* Día 101 – 26/09/2023 – Se comienza a medir con control de presión media
 
 ### Problemas principales
 * Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
@@ -385,16 +399,3 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * Evaluar el efecto de la mayor variabilidiad de la presion de base sobre la repetibilidad
 * Medir sangre para aumentar el N y evaluar la variabilidad de esta muestra
 * Verificar si la mayor variabilidad en muestras más rígidas se mantiene a pesar de las mejoras en la mecánica.
-
-### Eventos en el desarrollo que afectan las mediciones
-* Día 14 -- 30/11/22 -- Mejora del dispensado
-* Dia 23 -- 13/02/23 -- Cambio de placa
-* Dia 34 -- 17/04/23 -- Mejoramos mezclado (se aumenta a 3 el # de mezclados)
-* Dia 38 -- 28/04/23 -- Versión de Firmware 2.0.17
-* Dia 42 -- 08/05/23 -- Se cambia la frecuencia a 1 Hz  (días previos se comparan frecuencias de 0,5 y 1 Hz)
-* Dia 46_jeringa -- 01/06/23 -- Se ajusta la válvula cartucho y se mejora la alineación del émbolo -- Mejora la Presión de base
-* Día CT8_SL -- 20/06/23 -- Se lleva el Vilas a la sala limpia para medir en condiciones estables de temperatura
-* Día 50 -- 27/06/23 -- Se trae el Vilas al contenedor manteniendo la temperatura del ambiente baja para que sea estable
-* Día 66 -- 18/07/23 -- Se modifica el mezclado para dispensar cerca del CT: de 3 a 14 mezclados
-* Día 88 -- 04/09/2023 -- Se comienza a medir con mayor cantidad de carrier en el reservorio (llegó el FC770 importado)
-* Día 95 -- 13/09/2023 -- Error en toma de datos, cambio del acople luer, ajuste de embolo y cambio de motor de la pipeta
