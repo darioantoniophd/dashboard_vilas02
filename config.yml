@@ -2,7 +2,7 @@ sheet_id: 1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo
 sheet_name: 03_Registro
 range: '!A4:AQ'
 qc1_min: 16500
-deltaCC_max: 1000
+deltaCC_max: 2000
 delta_pmed_max: 400
 pbase_min: 15
 date_from: 19631.0
@@ -25,4 +25,5 @@ pruebas_cambio:
 - '58'
 - '81'
 - '101'
+- '104'
 - '106'
