@@ -363,7 +363,8 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
 * Día 66 -- 18/07/23 -- Se modifica el mezclado para dispensar cerca del CT: de 3 a 14 mezclados
 * Día 88 -- 04/09/2023 -- Se comienza a medir con mayor cantidad de carrier en el reservorio (llegó el FC770 importado)
 * Día 95 -- 13/09/2023 -- Error en toma de datos, cambio del acople luer, ajuste de embolo y cambio de motor de la pipeta
-* Día 101 – 26/09/2023 – Se comienza a medir con control de presión media
+* Día 101 – 26/09/2023 – Se comienza a medir con control de presión media - Mediciones en Home superior
+* Día 104 - 29/09/2023 - Mediciones en posición 15 uL y agregado de casita Manifold
 
 ### Problemas principales
 * Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
