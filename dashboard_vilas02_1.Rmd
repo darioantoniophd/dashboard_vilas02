@@ -67,6 +67,7 @@ my_data <- my_data %>%
     P_canal_cerrado_QC1 = as.numeric(as.character(`Canal cerrado Promedio QC1 [Pa]`)),
     P_canal_cerrado_QC3 = as.numeric(as.character(`Canal cerrado Promedio QC3 [Pa]`)),
     Activacion = as.character(Activacion),
+    Fase_A10 = as.numeric(as.character(Fase_A10)),
     Pasa_criterio_fase = as.character(Pasa_criterio_fase),
     Tz_i = as.numeric(as.character(Tz_i)),
     Tz_A10 = as.numeric(as.character(Tz_A10)),
@@ -218,7 +219,7 @@ Column {.sidebar}
 --------------------------------------------------
 
 ```{r}
-num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','Pmed_base','deltaPmed','Alpha','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
+num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
 cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha'))
 
 
