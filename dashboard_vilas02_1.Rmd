@@ -7,15 +7,12 @@ smooth_scroll: true
 runtime: shiny
 ---
 
-
 ```{r setup, include=FALSE}
 
 library(flexdashboard)
 library(dplyr)
 library(ggplot2)
 library(yaml)
-
-
 #library(jpeg)
 
 ```
@@ -112,7 +109,6 @@ subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
 ```
 
 ```{r}
-
 # Common theme settings for plots
 common_theme <- theme_bw() +
   theme(
@@ -128,7 +124,6 @@ common_theme <- theme_bw() +
 my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
 # Read the JPEG image
 # img <- readJPEG("felici.jpeg")
-
 
 switch(plot_type,
 scatter = {
@@ -208,8 +203,7 @@ sigma_A = {
 }
 )
 }
-  
- 
+
 
 ```
 
@@ -251,7 +245,6 @@ Column {data-width=650}
 ### Chart A
 
 ```{r}
-
 
 # Define a function to apply common filtering
 applyCommonFilter <- function(data, input) {
