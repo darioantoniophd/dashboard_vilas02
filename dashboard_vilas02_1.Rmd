@@ -13,7 +13,6 @@ library(flexdashboard)
 library(dplyr)
 library(ggplot2)
 library(yaml)
-#library(jpeg)
 
 ```
 
@@ -85,12 +84,16 @@ my_data <- my_data %>%
     A10corregido = (A10 * P_canal_cerrado_QC3)/(cte*P_canal_cerrado_QC3-A10),
     A10Rcorregido = AtoAR(A10corregido)
 )
-
+#subset con las mediciones tienen datos en A10
+my_data <- subset(my_data, !is.na(A10))
 #subset con las mediciones que no tuvieron problemas y tienen datos en A10
-subset_data <- subset(my_data, Problema == "ninguno" & !is.na(A10))
+subset_data <- subset(my_data, Problema == "ninguno")
+#subset con las mediciones que sí tuvieron problemas y tienen datos en A10
+subset_data_problema <- subset(my_data, Problema != "ninguno")
 
 # subset donde se aplica quality check y se pone como problema el motivo de falla
-my_data_QC <- subset_data
+#my_data_QC <- subset_data
+my_data_QC <- my_data
 my_data_QC$Problema[my_data_QC$Amplitud_base < config$pbase_min] <- 'QC_failed_Pbase'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
@@ -100,8 +103,8 @@ my_data_QC$Problema[abs(my_data_QC$deltaCC) > config$deltaCC_max] <- 'deltaCC_Al
 my_data_QC$Problema[abs(my_data_QC$deltaTz) > config$deltaTz_max] <- 'deltaTz_Alto'
 
 # actualiza columna Resultado con falsos positivos y falsos negativos del QC
-subset_data$Resultado[my_data_QC$Problema !=  'ninguno' & my_data_QC$Resultado == 'Buena'] <- 'Falso_negativo_QC'
-subset_data$Resultado[my_data_QC$Problema ==  'ninguno' & my_data_QC$Resultado == 'Mala'] <- 'Falso_positivo_QC'
+my_data_QC$Resultado[my_data_QC$Problema !=  'ninguno' & my_data_QC$Resultado == 'Buena'] <- 'Falso_negativo_QC'
+my_data_QC$Resultado[my_data_QC$Problema ==  'ninguno' & my_data_QC$Resultado == 'Mala'] <- 'Falso_positivo_QC'
 
 # subset con las mediciones que pasaron el QC 
 subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
@@ -204,7 +207,6 @@ sigma_A = {
 )
 }
 
-
 ```
 
 # Plots
@@ -214,8 +216,7 @@ Column {.sidebar}
 
 ```{r}
 num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
-cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha'))
-
+cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema'))
 
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = config$activacion)
@@ -233,8 +234,10 @@ dateRangeInput("date_range", "Select date range:",
                  format = "yyyy-mm-dd", separator = " to ")
 
 checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
-actionButton("save_button", "Save Selection")
 
+selectInput("problemas","Show Failed: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected ='Good')
+
+actionButton("save_button", "Save Selection")
 # numericInput("constante", label = "Enter a Number:", value = 1, min = 0, max = 10)
 
 ```
@@ -245,7 +248,6 @@ Column {data-width=650}
 ### Chart A
 
 ```{r}
-
 # Define a function to apply common filtering
 applyCommonFilter <- function(data, input) {
   filtered_data <- subset(data,
@@ -271,12 +273,24 @@ reactive_subset_data <- reactive({
   filtered_data <- applyCommonFilter(data_to_use, input)
   return(filtered_data)
 })
+# Filtra las mediciones sin problemas según selección de la gui
+reactive_subset_data_problema <- reactive({
+  # Apply common filtering using the function
+  filtered_data <- applyCommonFilter(subset_data_problema, input)
+  return(filtered_data)
+})
+
+
 
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
+incluyeProblemas = TRUE
   renderPlot({
-    my_plot(midata = reactive_subset_data(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
+    midata <- switch(input$problemas,
+    Good_and_failed = reactive_my_data(),
+    Failed = reactive_subset_data_problema(),
+    Good = reactive_subset_data())
+    my_plot(midata, x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
   })
-
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
   config$muestra <- input$values_muestra
@@ -319,15 +333,18 @@ ggplot(problema_summary, aes(x = "", y = Freq, fill = is_ninguno)) +  geom_bar(s
 library(RColorBrewer)
 
 renderPlot({
-# Create a data frame with the count of each value in the "Problema" column
-problema_count <- data.frame(table(reactive_my_data()$Problema))
 
+midata <- switch(input$problemas,
+    Good_and_failed = reactive_my_data(),
+    Failed = reactive_subset_data_problema(),
+    Good = reactive_subset_data())  
+  
+# Create a data frame with the count of each value in the "Problema" column
+problema_count <- data.frame(table(midata$Problema))
 # Remove the rows with "ninguno"
 problema_count <- problema_count[problema_count$Var1 != "ninguno", ]
-
 # Set the fill colors using the Paired color palette
 fill_colors <- brewer.pal(nrow(problema_count), "Paired")
-
 # Plot the counts of rows by value using a stacked bar plot with contrasting colors
 ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
   geom_bar(stat = "identity") +
@@ -338,9 +355,8 @@ ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
   scale_fill_manual(values = fill_colors) +
   geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
             position = position_stack(vjust = 0.5))
-})  
+})
 ```
-
 
 # Conclusiones  {.storyboard}
 
