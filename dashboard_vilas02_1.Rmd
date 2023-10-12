@@ -87,9 +87,9 @@ my_data <- my_data %>%
 #subset con las mediciones tienen datos en A10
 my_data <- subset(my_data, !is.na(A10))
 #subset con las mediciones que no tuvieron problemas y tienen datos en A10
-subset_data <- subset(my_data, Problema == "ninguno")
+my_data_sin_problema <- subset(my_data, Problema == "ninguno")
 #subset con las mediciones que sí tuvieron problemas y tienen datos en A10
-subset_data_problema <- subset(my_data, Problema != "ninguno")
+my_data_con_problema <- subset(my_data, Problema != "ninguno")
 
 # subset donde se aplica quality check y se pone como problema el motivo de falla
 #my_data_QC <- subset_data
@@ -107,7 +107,8 @@ my_data_QC$Resultado[my_data_QC$Problema !=  'ninguno' & my_data_QC$Resultado ==
 my_data_QC$Resultado[my_data_QC$Problema ==  'ninguno' & my_data_QC$Resultado == 'Mala'] <- 'Falso_positivo_QC'
 
 # subset con las mediciones que pasaron el QC 
-subset_data_QC <- subset(my_data_QC, Problema =="ninguno")
+my_data_QC_sin_problema <- subset(my_data_QC, Problema =="ninguno")
+my_data_QC_con_problema <- subset(my_data_QC, Problema !="ninguno")
 
 ```
 
@@ -218,9 +219,9 @@ Column {.sidebar}
 num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
 cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema'))
 
-selectInput("values_muestra", "Select values for Muestra:", choices = unique(subset_data$Muestra), multiple = TRUE, selected = config$muestra)
-selectInput("values_activacion", "Select values for Activacion:", choices = unique(subset_data$Activacion), multiple = TRUE, selected = config$activacion)
-selectInput("values_freq", "Select values for Frequency:", choices = unique(subset_data$Frecuencia), multiple = TRUE, selected = '1')
+selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
+selectInput("values_activacion", "Select values for Activacion:", choices = unique(my_data$Activacion), multiple = TRUE, selected = config$activacion)
+selectInput("values_freq", "Select values for Frequency:", choices = unique(my_data$Frecuencia), multiple = TRUE, selected = '1')
 selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
 
 selectInput("x_var", "Select X axis variable:", choices = num_variables, multiple = FALSE, selected ='Prueba') 
@@ -267,28 +268,26 @@ reactive_my_data <- reactive({
   return(filtered_data)
 })
 # Filtra las mediciones sin problemas según selección de la gui
-reactive_subset_data <- reactive({
-  data_to_use <- if (input$aplicar_QC) subset_data_QC else subset_data
+reactive_my_data_sin_problema <- reactive({
+  data_to_use <- if (input$aplicar_QC) my_data_QC_sin_problema else my_data_sin_problema
   # Apply common filtering using the function
   filtered_data <- applyCommonFilter(data_to_use, input)
   return(filtered_data)
 })
-# Filtra las mediciones sin problemas según selección de la gui
-reactive_subset_data_problema <- reactive({
+# Filtra las mediciones con problemas según selección de la gui
+reactive_my_data_con_problema <- reactive({
+  data_to_use <- if (input$aplicar_QC) my_data_QC_con_problema else my_data_con_problema
   # Apply common filtering using the function
-  filtered_data <- applyCommonFilter(subset_data_problema, input)
+  filtered_data <- applyCommonFilter(data_to_use, input)
   return(filtered_data)
 })
 
-
-
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
-incluyeProblemas = TRUE
-  renderPlot({
+renderPlot({
     midata <- switch(input$problemas,
     Good_and_failed = reactive_my_data(),
-    Failed = reactive_subset_data_problema(),
-    Good = reactive_subset_data())
+    Failed = reactive_my_data_con_problema(),
+    Good = reactive_my_data_sin_problema())
     my_plot(midata, x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
   })
 # Update the configuration and save to YAML when Save button is clicked
@@ -309,8 +308,12 @@ Column {data-width=350}
 ```{r}
 renderPlot({
 
+midata <- switch(input$problemas,
+    Good_and_failed = reactive_my_data(),
+    Failed = reactive_my_data_con_problema(),
+    Good = reactive_my_data_sin_problema())
 # Create a frequency table of the "Problema" column
-problema_count <- data.frame(table(Problema = reactive_my_data()$Problema))
+problema_count <- data.frame(table(Problema = midata$Problema))
 
 # Add a column to indicate "ninguno" or "otro"
 problema_count$is_ninguno <- ifelse(problema_count$Problema == "ninguno", "ninguno", "otro")
@@ -336,8 +339,8 @@ renderPlot({
 
 midata <- switch(input$problemas,
     Good_and_failed = reactive_my_data(),
-    Failed = reactive_subset_data_problema(),
-    Good = reactive_subset_data())  
+    Failed = reactive_my_data_con_problema(),
+    Good = reactive_my_data_sin_problema())  
   
 # Create a data frame with the count of each value in the "Problema" column
 problema_count <- data.frame(table(midata$Problema))
