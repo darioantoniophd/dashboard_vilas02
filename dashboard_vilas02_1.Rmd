@@ -236,7 +236,7 @@ dateRangeInput("date_range", "Select date range:",
 
 checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
 
-selectInput("problemas","Show Failed: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected =config$problemas)
+selectInput("problemas","Measurement Status: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected =config$problemas)
 
 actionButton("save_button", "Save Selection")
 # numericInput("constante", label = "Enter a Number:", value = 1, min = 0, max = 10)
@@ -356,7 +356,7 @@ problema_count <- data.frame(table(Problema = midata$Problema))
 # Check if all values in the "Problema" column are "ninguno"
 if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
   ggplot() +
-        geom_text(aes(x = 0, y = 0, label = "Ninguna medición tiene problemas."), hjust = 0.5, vjust = 0.5, size = 8) +
+        geom_text(aes(x = 0, y = 0, label = "Ninguna medición de la selección tiene problemas."), hjust = 0.5, vjust = 0.5, size = 6) +
         theme_void()
 } else {
   # Remove the rows with "ninguno"
