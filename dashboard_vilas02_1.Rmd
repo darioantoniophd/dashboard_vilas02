@@ -246,7 +246,7 @@ actionButton("save_button", "Save Selection")
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Resultados de las Mediciones
 
 ```{r}
 # Define a function to apply common filtering
@@ -311,7 +311,7 @@ observeEvent(input$save_button, {
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Porcentaje de mediciones con problemas
 
 ```{r}
 renderPlot({
@@ -321,24 +321,24 @@ midata <- switch(input$problemas,
     Failed = reactive_my_data_con_problema(),
     Good = reactive_my_data_sin_problema())
 # Create a frequency table of the "Problema" column
-problema_count <- data.frame(table(Problema = midata$Problema))
+problema_count <- data.frame(table(tipo_problema = midata$Problema))
 
 # Add a column to indicate "ninguno" or "otro"
-problema_count$is_ninguno <- ifelse(problema_count$Problema == "ninguno", "ninguno", "otro")
+problema_count$Problema <- ifelse(problema_count$tipo_problema == "ninguno", "Sin problema", "Con problema")
 
 # Summarize the counts by "ninguno" and "otro"
-problema_summary <- aggregate(Freq ~ is_ninguno, data = problema_count, sum)
+problema_summary <- aggregate(Freq ~ Problema, data = problema_count, sum)
 
 # Plot the summary using a stacked bar plot
-ggplot(problema_summary, aes(x = "", y = Freq, fill = is_ninguno)) +  geom_bar(stat = "identity") +
-  theme_classic() +  xlab("") +  ylab("Count") +
-  ggtitle("Count of rows with 'ninguno' vs other values in 'Problema' column") +
+ggplot(problema_summary, aes(x = "", y = Freq, fill = Problema)) +  geom_bar(stat = "identity") +
+  theme_classic() +  xlab("") +  ylab("Cantidad de mediciones") +
+  #ggtitle("Cantidad de mediciones con y sin problemas") +
   geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), position = position_stack(vjust = 0.5))
 })  
   
 ```
 
-### Chart C
+### Tipos de problemas en las mediciones
 
 ```{r}
 library(RColorBrewer)
@@ -351,21 +351,31 @@ midata <- switch(input$problemas,
     Good = reactive_my_data_sin_problema())  
   
 # Create a data frame with the count of each value in the "Problema" column
-problema_count <- data.frame(table(midata$Problema))
-# Remove the rows with "ninguno"
-problema_count <- problema_count[problema_count$Var1 != "ninguno", ]
-# Set the fill colors using the Paired color palette
-fill_colors <- brewer.pal(nrow(problema_count), "Paired")
-# Plot the counts of rows by value using a stacked bar plot with contrasting colors
-ggplot(problema_count, aes(x = "", y = Freq, fill = Var1)) +
-  geom_bar(stat = "identity") +
-  theme_classic() +
-  xlab("") +
-  ylab("Count") +
-  ggtitle("Count of rows with values other than 'ninguno' in 'Problema' column, grouped by value") +
-  scale_fill_manual(values = fill_colors) +
-  geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
-            position = position_stack(vjust = 0.5))
+problema_count <- data.frame(table(Problema = midata$Problema))
+
+# Check if all values in the "Problema" column are "ninguno"
+if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
+  ggplot() +
+        geom_text(aes(x = 0, y = 0, label = "Ninguna medición tiene problemas."), hjust = 0.5, vjust = 0.5, size = 8) +
+        theme_void()
+} else {
+  # Remove the rows with "ninguno"
+  problema_count <- problema_count[problema_count$Problema != "ninguno", ]
+
+  # Set the fill colors using the Paired color palette
+  fill_colors <- brewer.pal(nrow(problema_count), "Paired")
+
+  # Plot the counts of rows by value using a stacked bar plot with contrasting colors
+  ggplot(problema_count, aes(x = "", y = Freq, fill = Problema)) +
+    geom_bar(stat = "identity") +
+    theme_classic() +
+    xlab("") +
+    ylab("Count") +
+    # ggtitle("Count of rows with values other than 'ninguno' in 'Problema' column, grouped by value") +
+    scale_fill_manual(values = fill_colors) +
+    geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
+              position = position_stack(vjust = 0.5))
+}
 })
 ```
 
