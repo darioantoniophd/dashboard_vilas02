@@ -12,15 +12,22 @@ muestra:
 - SANGRE
 - SANGRE VIEJA
 - PLASMA SIEMENS
-- ROTROL N DESC
 - ROTROL P
-- ROTROL P DESC
 - ROTROL P VIEJO
+- ROTROL N DESC
+- ROTROL P DESC
 activacion:
 - in-tem
 - aPTTest W
+values_freq: '1'
+plot_type: scatter
+x_var: Prueba
+y_var: A10
+color_var: Problema
+shape_var: Activacion
+problemas: Good_and_failed
 pruebas_cambio:
-- '44b'
+- 44b
 - '53'
 - '58'
 - '81'

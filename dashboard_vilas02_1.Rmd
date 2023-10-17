@@ -221,14 +221,14 @@ cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pm
 
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(my_data$Activacion), multiple = TRUE, selected = config$activacion)
-selectInput("values_freq", "Select values for Frequency:", choices = unique(my_data$Frecuencia), multiple = TRUE, selected = '1')
-selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected ='scatter')
+selectInput("values_freq", "Select values for Frequency:", choices = unique(my_data$Frecuencia), multiple = TRUE, selected = config$values_freq)
+selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected =config$plot_type)
 
-selectInput("x_var", "Select X axis variable:", choices = num_variables, multiple = FALSE, selected ='Prueba') 
-selectInput("y_var", "Select Y axis variable:", choices = num_variables, multiple = FALSE, selected ='A10')
+selectInput("x_var", "Select X axis variable:", choices = num_variables, multiple = FALSE, selected = config$x_var) 
+selectInput("y_var", "Select Y axis variable:", choices = num_variables, multiple = FALSE, selected =config$y_var)
 
-selectInput("color_var", "Select color variable:", choices = cat_variables, multiple = FALSE, selected ='Muestra')
-selectInput("shape_var", "Select shape variable:", choices = cat_variables, multiple = FALSE, selected ='Activacion')
+selectInput("color_var", "Select color variable:", choices = cat_variables, multiple = FALSE, selected =config$color_var)
+selectInput("shape_var", "Select shape variable:", choices = cat_variables, multiple = FALSE, selected =config$shape_var)
 
 dateRangeInput("date_range", "Select date range:", 
                  start = as.Date(config$date_from), end = Sys.Date(), 
@@ -236,7 +236,7 @@ dateRangeInput("date_range", "Select date range:",
 
 checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
 
-selectInput("problemas","Show Failed: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected ='Good')
+selectInput("problemas","Show Failed: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected =config$problemas)
 
 actionButton("save_button", "Save Selection")
 # numericInput("constante", label = "Enter a Number:", value = 1, min = 0, max = 10)
@@ -293,8 +293,16 @@ renderPlot({
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
   config$muestra <- input$values_muestra
-  config$date_from <- input$date_range[1]
   config$activacion <- input$values_activacion
+  config$values_freq <- input$values_freq
+  config$plot_type <- input$plot_type
+  config$x_var <- input$x_var
+  config$y_var <- input$y_var
+  config$color_var <- input$color_var
+  config$shape_var <- input$shape_var
+  config$date_from <- input$date_range[1]
+  config$problemas <- input$problemas
+  
   write_yaml(config, file = "config.yml")
 })
 
