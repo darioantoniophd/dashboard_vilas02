@@ -1,31 +1,24 @@
 sheet_id: 1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo
 sheet_name: 03_Registro
-range: '!A4:AR'
-qc1_min: 16500
+range: '!A4:AQ'
+qc1_min: 18000
+qc3_min: 17500
 deltaCC_max: 2000
 delta_pmed_max: 400
-pbase_min: 15
-date_from: 19631.0
-deltaTz_max: 0.25
-muestra:
-- ROTROL N
-- SANGRE
-- SANGRE VIEJA
-- PLASMA SIEMENS
-- ROTROL P
-- ROTROL P VIEJO
-- ROTROL N DESC
-- ROTROL P DESC
+pbase_min: 12
+date_from: 19638.0
+deltaTz_max: 0.5
+muestra: SANGRE
 activacion:
 - in-tem
 - aPTTest W
 values_freq: '1'
 plot_type: scatter
 x_var: Prueba
-y_var: A10
+y_var: P_canal_cerrado_QC3
 color_var: Problema
 shape_var: Activacion
-problemas: Good_and_failed
+problemas: Good
 pruebas_cambio:
 - 44b
 - '53'
