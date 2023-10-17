@@ -30,7 +30,7 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 # Get the sheet ID and sheet name
 
 AtoAR <- function(A)
-{  AR <- 100/(1+2000/A)
+{  AR <- 100/(1+1000/A)
   return(AR) }
 
 sheet_id <- config$sheet_id
