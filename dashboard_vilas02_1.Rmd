@@ -52,9 +52,11 @@ my_data <- my_data %>%
     A10 = as.numeric(as.character(`A10 (600s+CT) [Pa]`)),
     A1 = as.numeric(as.character(`A1 (60s+CT) [Pa]`)),
     A5 = as.numeric(as.character(`A5 (300s+CT) [Pa]`)),
-    A20 = as.numeric(as.character(`A20 (1200s+CT) [Pa]`)),
+    #A20 = as.numeric(as.character(`A20 (1200s+CT) [Pa]`)),
     CT = as.numeric(as.character(`CT [seg]`)),
     Alpha = as.numeric(as.character(Alpha)),
+    CT_R = as.numeric(as.character(`CT_R [seg]`)),
+    A10_R = as.numeric(as.character(`A10_R [mm]`)),
     Frecuencia_Hz = as.numeric(as.character(Frecuencia_Hz)),
     Nro_Cartucho = as.character(`Nro Cartucho`),
     P_desprendimiento = as.numeric(as.character(`Presion de desprendimiento [Pa]`)),
@@ -97,6 +99,7 @@ my_data_QC <- my_data
 my_data_QC$Problema[my_data_QC$Amplitud_base < config$pbase_min] <- 'QC_failed_Pbase'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
 my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
+my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC3 < config$qc3_min] <- 'canal_cerrado'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 my_data_QC$Problema[abs(my_data_QC$deltaCC) > config$deltaCC_max] <- 'deltaCC_Alto'
@@ -216,7 +219,7 @@ Column {.sidebar}
 --------------------------------------------------
 
 ```{r}
-num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
+num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','CT_R','A10_R','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
 cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema'))
 
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
