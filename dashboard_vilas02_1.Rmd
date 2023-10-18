@@ -71,6 +71,7 @@ my_data <- my_data %>%
     Tz_A10 = as.numeric(as.character(Tz_A10)),
     Resultado = as.character(Resultado),
     Problema = as.character(Problema),
+    Observaciones = as.character(Observaciones),
     .keep = "none"  # Drop all original columns after transformation
   )
 
@@ -263,35 +264,20 @@ applyCommonFilter <- function(data, input) {
   )
   return(filtered_data)
 }
-# Filtra todas las mediciones según selección de la gui
-reactive_my_data <- reactive({
-  data_to_use <- if (input$aplicar_QC) my_data_QC else my_data
-  # Apply common filtering using the function
-  filtered_data <- applyCommonFilter(data_to_use, input)
-  return(filtered_data)
-})
-# Filtra las mediciones sin problemas según selección de la gui
-reactive_my_data_sin_problema <- reactive({
-  data_to_use <- if (input$aplicar_QC) my_data_QC_sin_problema else my_data_sin_problema
-  # Apply common filtering using the function
-  filtered_data <- applyCommonFilter(data_to_use, input)
-  return(filtered_data)
-})
-# Filtra las mediciones con problemas según selección de la gui
-reactive_my_data_con_problema <- reactive({
-  data_to_use <- if (input$aplicar_QC) my_data_QC_con_problema else my_data_con_problema
-  # Apply common filtering using the function
-  filtered_data <- applyCommonFilter(data_to_use, input)
-  return(filtered_data)
-})
+# # Filtra todas las mediciones según selección de la gui
+
+ midata <- reactive({
+    data_to_use <- switch(input$problemas,
+    Good_and_failed = if (input$aplicar_QC) my_data_QC else my_data,
+    Failed = if (input$aplicar_QC) my_data_QC_con_problema else my_data_con_problema,
+    Good = if (input$aplicar_QC) my_data_QC_sin_problema else my_data_sin_problema)
+ # Apply common filtering using the function
+    filtered_data <- applyCommonFilter(data_to_use, input)
+    return(filtered_data)})
 
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
 renderPlot({
-    midata <- switch(input$problemas,
-    Good_and_failed = reactive_my_data(),
-    Failed = reactive_my_data_con_problema(),
-    Good = reactive_my_data_sin_problema())
-    my_plot(midata, x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
+    my_plot(midata(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
   })
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
@@ -319,10 +305,7 @@ Column {data-width=350}
 ```{r}
 renderPlot({
 
-midata <- switch(input$problemas,
-    Good_and_failed = reactive_my_data(),
-    Failed = reactive_my_data_con_problema(),
-    Good = reactive_my_data_sin_problema())
+midata = midata()
 # Create a frequency table of the "Problema" column
 problema_count <- data.frame(table(tipo_problema = midata$Problema))
 
@@ -348,11 +331,7 @@ library(RColorBrewer)
 
 renderPlot({
 
-midata <- switch(input$problemas,
-    Good_and_failed = reactive_my_data(),
-    Failed = reactive_my_data_con_problema(),
-    Good = reactive_my_data_sin_problema())  
-  
+midata = midata()  
 # Create a data frame with the count of each value in the "Problema" column
 problema_count <- data.frame(table(Problema = midata$Problema))
 
@@ -424,3 +403,16 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
 * Evaluar el efecto de la mayor variabilidiad de la presion de base sobre la repetibilidad
 * Medir sangre para aumentar el N y evaluar la variabilidad de esta muestra
 * Verificar si la mayor variabilidad en muestras más rígidas se mantiene a pesar de las mejoras en la mecánica.
+
+# Tabla mediciones 
+Column {.sidebar data-width=1500}
+--------------------------------------------------
+
+```{r}
+
+renderDataTable({
+  midata() %>%
+    select(Medicion, Fecha, Observaciones)
+})
+```
+
