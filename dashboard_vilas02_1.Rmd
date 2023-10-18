@@ -2,7 +2,7 @@
 title: "Dashboard Vilas 02"
 output: flexdashboard::flex_dashboard
 orientation: columns
-vertical_layout: fill
+vertical_layout: scroll
 smooth_scroll: true
 runtime: shiny
 ---
@@ -79,13 +79,14 @@ my_data <- my_data %>%
 cte=.8
 my_data <- my_data %>%
   mutate(
-    A10R = AtoAR(A10),
+    A10_mm = AtoAR(A10),
     Medicion = paste(Prueba,Medicion) ,
     deltaCC = P_canal_cerrado_QC3-P_canal_cerrado_QC1,
     deltaTz = Tz_A10-Tz_i,
     deltaPmed = Pmed_A10 - Pmed_base,
     A10corregido = (A10 * P_canal_cerrado_QC3)/(cte*P_canal_cerrado_QC3-A10),
-    A10Rcorregido = AtoAR(A10corregido)
+    A10_mm_corregido = AtoAR(A10corregido),
+    Fila = row_number()
 )
 #subset con las mediciones tienen datos en A10
 my_data <- subset(my_data, !is.na(A10))
@@ -220,7 +221,7 @@ Column {.sidebar}
 --------------------------------------------------
 
 ```{r}
-num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10R','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','CT_R','A10_R','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10Rcorregido'))
+num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10_mm','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','CT_R','A10_R','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10_mm_corregido','Fila'))
 cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema'))
 
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
@@ -265,8 +266,13 @@ applyCommonFilter <- function(data, input) {
   return(filtered_data)
 }
 # # Filtra todas las mediciones según selección de la gui
-
  midata <- reactive({
+   data_to_use <- if (input$aplicar_QC) my_data_QC else my_data
+   filtered_data <- applyCommonFilter(data_to_use, input)
+    return(filtered_data)
+   })
+
+ midata_status <- reactive({
     data_to_use <- switch(input$problemas,
     Good_and_failed = if (input$aplicar_QC) my_data_QC else my_data,
     Failed = if (input$aplicar_QC) my_data_QC_con_problema else my_data_con_problema,
@@ -277,7 +283,8 @@ applyCommonFilter <- function(data, input) {
 
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
 renderPlot({
-    my_plot(midata(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
+    
+    my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
   })
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
@@ -361,6 +368,21 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
 })
 ```
 
+# Tabla mediciones 
+
+```{r}
+renderDataTable({
+  midata() %>%
+    select(Fila, Medicion, Fecha, Observaciones,A10,Pasa_criterio_fase,Resultado) %>% arrange(desc(Fila)) 
+},options = list(
+    lengthMenu = list(c(5, 15, 20), c('5', '15', '20')),
+    pageLength = 15
+  ))
+
+
+
+```
+
 # Conclusiones  {.storyboard}
 
 ### Eventos en el desarrollo que afectan las mediciones
@@ -404,15 +426,4 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
 * Medir sangre para aumentar el N y evaluar la variabilidad de esta muestra
 * Verificar si la mayor variabilidad en muestras más rígidas se mantiene a pesar de las mejoras en la mecánica.
 
-# Tabla mediciones 
-Column {.sidebar data-width=1500}
---------------------------------------------------
-
-```{r}
-
-renderDataTable({
-  midata() %>%
-    select(Medicion, Fecha, Observaciones)
-})
-```
 
