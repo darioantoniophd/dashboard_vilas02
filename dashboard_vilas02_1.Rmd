@@ -243,7 +243,10 @@ checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
 
 selectInput("problemas","Measurement Status: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected =config$problemas)
 
-actionButton("save_button", "Save Selection")
+tags$style(HTML(".btn-space { margin: 10px 0; }"))  # Add custom CSS
+
+actionButton("save_button", "Save Selection", class = "btn-space")
+actionButton("reset_button", "Reset Selection", class = "btn-space")
 # numericInput("constante", label = "Enter a Number:", value = 1, min = 0, max = 10)
 
 ```
@@ -300,6 +303,20 @@ observeEvent(input$save_button, {
   config$problemas <- input$problemas
   
   write_yaml(config, file = "config.yml")
+})
+
+observeEvent(input$reset_button, {
+  updateSelectInput(session, "values_muestra", selected = config$muestra)
+  updateSelectInput(session, "values_activacion", selected = config$activacion)
+  updateSelectInput(session, "plot_type", selected = config$plot_type)
+  updateSelectInput(session, "x_var", selected = config$x_var)
+  updateSelectInput(session, "y_var", selected = config$y_var)
+  updateSelectInput(session, "color_var", selected = config$color_var)
+  updateSelectInput(session, "shape_var", selected = config$shape_var)
+  updateDateRangeInput(session, "date_range", start = config$date_from, end = Sys.Date())
+  updateSelectInput(session, "problemas", selected = config$problemas)
+ 
+  
 })
 
 ```
