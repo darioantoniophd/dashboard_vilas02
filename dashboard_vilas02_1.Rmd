@@ -13,6 +13,7 @@ library(flexdashboard)
 library(dplyr)
 library(ggplot2)
 library(yaml)
+library(plotly)
 
 ```
 
@@ -130,14 +131,14 @@ common_theme <- theme_bw() +
 #                 "#9932CC", "#FF1493")
 
 # funcion que plotea datos
-my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
+my_plot <- function(midata, x_col, a_col, color_col, shape_col, text_col, plot_type) {
 # Read the JPEG image
 # img <- readJPEG("felici.jpeg")
 
 switch(plot_type,
 scatter = {
    # Create scatter plot using ggplot2
-  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]])) +
+  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]],text=.data[[text_col]])) +
     geom_point(size= 3) +
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
     common_theme+
@@ -285,9 +286,9 @@ applyCommonFilter <- function(data, input) {
     return(filtered_data)})
 
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
-renderPlot({
+renderPlotly({
     
-    my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
+    my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,text_col ='Medicion',plot_type=input$plot_type)
   })
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
@@ -369,7 +370,7 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
   problema_count <- problema_count[problema_count$Problema != "ninguno", ]
 
   # Set the fill colors using the Paired color palette
-  fill_colors <- brewer.pal(nrow(problema_count), "Paired")
+  #fill_colors <- brewer.pal(nrow(problema_count), "Paired")
 
   # Plot the counts of rows by value using a stacked bar plot with contrasting colors
   ggplot(problema_count, aes(x = "", y = Freq, fill = Problema)) +
@@ -378,7 +379,7 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
     xlab("") +
     ylab("Count") +
     # ggtitle("Count of rows with values other than 'ninguno' in 'Problema' column, grouped by value") +
-    scale_fill_manual(values = fill_colors) +
+   # scale_fill_manual(values = fill_colors) +
     geom_text(aes(label = paste0(round(Freq / sum(Freq) * 100), "%")), 
               position = position_stack(vjust = 0.5))
 }
