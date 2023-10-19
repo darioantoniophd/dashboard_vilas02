@@ -131,14 +131,14 @@ common_theme <- theme_bw() +
 #                 "#9932CC", "#FF1493")
 
 # funcion que plotea datos
-my_plot <- function(midata, x_col, a_col, color_col, shape_col, text_col, plot_type) {
+my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
 # Read the JPEG image
 # img <- readJPEG("felici.jpeg")
 
 switch(plot_type,
 scatter = {
    # Create scatter plot using ggplot2
-  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]],text=.data[[text_col]])) +
+  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]],text=Medicion)) +
     geom_point(size= 3) +
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
     common_theme+
@@ -160,9 +160,9 @@ boxplot = {
   geom_boxplot() +
   labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
   common_theme+
-  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red") +
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", cv, "%")), vjust = 1, angle =55, size = 3, color = "blue", nudge_x = -0.2)
-  
+ 
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.7, label = paste0("", N)),  size = 3, color = "red") +
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.9, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") 
 } ,
 boxplot_sd = {
   # boxplot with labels
@@ -177,14 +177,14 @@ boxplot_sd = {
 
 # Plot boxplot with CV and N labels
   ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]])) +
-  geom_point(data = cv_data, aes(y = mean,color =dcolor), size = 3) +
-  geom_segment(data = cv_data, aes(x = .data[[x_col]], xend=.data[[x_col]],  y = mean - sd, yend = mean + sd, color =dcolor ), size = 1.5) +
+  geom_point(data = cv_data, aes(y = mean,color=dcolor,text=paste0("sd: ", round(sd,0))), size = 3) +
+  geom_segment(data = cv_data, aes(x = .data[[x_col]], xend=.data[[x_col]],  y = mean - sd, yend = mean + sd, color=dcolor ), size = 1.5) +
   labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col) +
   common_theme +
-  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", N)), vjust = -1, size = 3, color = "red", nudge_x = -0.2) +
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", round(sd,0))), vjust = 1, angle = 0, size = 3, color = "brown", nudge_x = -0.2)+
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]]), label = paste0("", round(cv,0), "%")), vjust = 3, angle = 0, size = 3, color = "blue", nudge_x = -0.2) +
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = mean, label = paste0("", round(mean,0))), hjust = -1, size = 3, color = "black") 
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.7, label = paste0("", N)),  size = 3, color = "red") +
+  #geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*1.15, label = paste0("", round(sd,0))),  angle = 0, size = 3, color = "brown")+
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.9, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") #+
+  #geom_text(data = cv_data, aes(x = .data[[x_col]], y = mean, label = paste0("", round(mean,0))), hjust = -1, size = 3, color = "black") 
 } ,
 sigma_A = {
   # boxplot with labels
@@ -288,7 +288,7 @@ applyCommonFilter <- function(data, input) {
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
 renderPlotly({
     
-    my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,text_col ='Medicion',plot_type=input$plot_type)
+    my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
   })
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
