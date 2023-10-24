@@ -86,7 +86,7 @@ my_data <- my_data %>%
     deltaCC = P_canal_cerrado_QC3-P_canal_cerrado_QC1,
     deltaTz = Tz_A10-Tz_i,
     deltaPmed = Pmed_A10 - Pmed_base,
-    A10corregido = (A10 * P_canal_cerrado_QC1)/(cte*P_canal_cerrado_QC1-A10),
+    A10corregido = A10 + (18200 - P_canal_cerrado_QC3)*.1355,
     A10_mm_corregido = AtoAR(A10corregido),
     Fila = row_number()
 )
@@ -117,6 +117,12 @@ my_data_QC$Resultado[my_data_QC$Problema ==  'ninguno' & my_data_QC$Resultado ==
 my_data_QC_sin_problema <- subset(my_data_QC, Problema =="ninguno")
 my_data_QC_con_problema <- subset(my_data_QC, Problema !="ninguno")
 
+# ggplot(my_data_QC_sin_problema,aes(P_canal_cerrado_QC3, A10)) +
+#   geom_point(size= 3) +
+#   common_theme+
+#   geom_smooth(method='lm', formula= y~x)
+
+
 ```
 
 ```{r}
@@ -132,21 +138,32 @@ common_theme <- theme_bw() +
 #                 "#9932CC", "#FF1493")
 
 # funcion que plotea datos
-my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type) {
+my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type, fitear) {
 # Read the JPEG image
 # img <- readJPEG("felici.jpeg")
 
 switch(plot_type,
 scatter = {
-   # Create scatter plot using ggplot2
-  ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]],text=Medicion)) +
+  # Select the columns using dplyr::select
+    selected_data <- midata %>% dplyr::select(!!sym(x_col), !!sym(a_col))
+    
+  if (fitear){
+      # Fit a linear model
+      lm_model <- lm(selected_data[[a_col]] ~ selected_data[[x_col]])
+      print(summary(lm_model))
+    }
+  
+  # Create scatter plot using ggplot2
+ miplot <- ggplot(midata, aes(x = .data[[x_col]], y = .data[[a_col]], color = .data[[color_col]], shape = .data[[shape_col]],label=Medicion)) +
     geom_point(size= 3) +
     labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
-    common_theme+
+    common_theme
+ 
+ if (fitear) {miplot <- miplot + geom_smooth(method = "lm")}
      # Add vertical lines 
-   if (x_col=='Prueba') {
-        geom_vline(xintercept = config$pruebas_cambio, linetype = "dashed", color = "red")
-    }},
+   #if (x_col=='Prueba') {geom_vline(xintercept = config$pruebas_cambio, linetype = "dashed", color = "red")}
+  return(miplot) 
+  },
 boxplot = {
   # boxplot with labels
   # calculate CV values for each group
@@ -242,6 +259,7 @@ dateRangeInput("date_range", "Select date range:",
                  format = "yyyy-mm-dd", separator = " to ")
 
 checkboxInput("aplicar_QC", "Aplicar QC", FALSE)
+checkboxInput("fitear", "Fitear", FALSE)
 
 selectInput("problemas","Measurement Status: ", choices = c('Failed','Good','Good_and_failed'), multiple = FALSE,selected =config$problemas)
 
@@ -250,6 +268,7 @@ tags$style(HTML(".btn-space { margin: 10px 0; }"))  # Add custom CSS
 actionButton("save_button", "Save Selection", class = "btn-space")
 actionButton("reset_button", "Reset Selection", class = "btn-space")
 # numericInput("constante", label = "Enter a Number:", value = 1, min = 0, max = 10)
+
 
 ```
 
@@ -288,9 +307,10 @@ applyCommonFilter <- function(data, input) {
 
 # Render plot based on plot type, filtered data object and user's selected x, y, shape and color columns
 renderPlotly({
-    
-    my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type)
+  my_plot(midata_status(), x_col = input$x_var, a_col = input$y_var, color_col = input$color_var,  shape_col = input$shape_var,plot_type=input$plot_type,fitear=input$fitear)  
+  
   })
+
 # Update the configuration and save to YAML when Save button is clicked
 observeEvent(input$save_button, {
   config$muestra <- input$values_muestra
@@ -419,6 +439,9 @@ renderDataTable({
 * Día 101 – 26/09/2023 -- Se comienza a medir con control de presión media - Mediciones en Home superior
 * Día 104 - 29/09/2023 -- Mediciones en posición 15 uL y agregado de casita Manifold
 * Día 110 - 09/10/23 --  Mediciones en Home superior
+
+### Mensajes
+
 
 ### Problemas principales
 * Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
