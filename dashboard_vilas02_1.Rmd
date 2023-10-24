@@ -60,6 +60,7 @@ my_data <- my_data %>%
     A10_R = as.numeric(as.character(`A10_R [mm]`)),
     Frecuencia_Hz = as.numeric(as.character(Frecuencia_Hz)),
     Nro_Cartucho = as.character(`Nro Cartucho`),
+    Sujeto = as.character(Sujeto),
     P_desprendimiento = as.numeric(as.character(`Presion de desprendimiento [Pa]`)),
     Frecuencia = as.numeric(as.character(Frecuencia_Hz)),
     P_canal_abierto_QC2 = as.numeric(as.character(`Canal abierto Promedio QC2 [Pa]`)),
@@ -77,7 +78,7 @@ my_data <- my_data %>%
   )
 
 # create new columns
-cte=.8
+cte=1
 my_data <- my_data %>%
   mutate(
     A10_mm = AtoAR(A10),
@@ -85,7 +86,7 @@ my_data <- my_data %>%
     deltaCC = P_canal_cerrado_QC3-P_canal_cerrado_QC1,
     deltaTz = Tz_A10-Tz_i,
     deltaPmed = Pmed_A10 - Pmed_base,
-    A10corregido = (A10 * P_canal_cerrado_QC3)/(cte*P_canal_cerrado_QC3-A10),
+    A10corregido = (A10 * P_canal_cerrado_QC1)/(cte*P_canal_cerrado_QC1-A10),
     A10_mm_corregido = AtoAR(A10corregido),
     Fila = row_number()
 )
@@ -222,8 +223,8 @@ Column {.sidebar}
 --------------------------------------------------
 
 ```{r}
-num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10_mm','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','CT_R','A10_R','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10_mm_corregido','Fila'))
-cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema'))
+num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10_mm','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','CT_R','A10_R','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10_mm_corregido','Fila','Sujeto'))
+cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema','Sujeto'))
 
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(my_data$Activacion), multiple = TRUE, selected = config$activacion)
