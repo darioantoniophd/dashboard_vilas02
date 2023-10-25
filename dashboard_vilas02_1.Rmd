@@ -31,7 +31,7 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 # Get the sheet ID and sheet name
 
 AtoAR <- function(A)
-{  AR <- 100/(1+1000/A)
+{  AR <- 100/(1+1100/A)
   return(AR) }
 
 sheet_id <- config$sheet_id
@@ -102,8 +102,8 @@ my_data_con_problema <- subset(my_data, Problema != "ninguno")
 my_data_QC <- my_data
 my_data_QC$Problema[my_data_QC$Amplitud_base < config$pbase_min] <- 'QC_failed_Pbase'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
-my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado'
-my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC3 < config$qc3_min] <- 'canal_cerrado'
+my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'canal_cerrado_qc1'
+my_data_QC$Problema[my_data_QC$P_canal_cerrado_QC3 < config$qc3_min] <- 'canal_cerrado_qc3'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max & my_data_QC$P_canal_cerrado_QC1 < config$qc1_min] <- 'delta_Pmed & canal_cerrado'
 my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 my_data_QC$Problema[abs(my_data_QC$deltaCC) > config$deltaCC_max] <- 'deltaCC_Alto'
@@ -439,9 +439,6 @@ renderDataTable({
 * Día 101 – 26/09/2023 -- Se comienza a medir con control de presión media - Mediciones en Home superior
 * Día 104 - 29/09/2023 -- Mediciones en posición 15 uL y agregado de casita Manifold
 * Día 110 - 09/10/23 --  Mediciones en Home superior
-
-### Mensajes
-
 
 ### Problemas principales
 * Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
