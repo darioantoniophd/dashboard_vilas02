@@ -86,7 +86,8 @@ my_data <- my_data %>%
     deltaCC = P_canal_cerrado_QC3-P_canal_cerrado_QC1,
     deltaTz = Tz_A10-Tz_i,
     deltaPmed = Pmed_A10 - Pmed_base,
-    A10corregido = A10 + (18200 - P_canal_cerrado_QC3)*.1355,
+    #A10corregido = A10 + (18200 - P_canal_cerrado_QC3)*.1355,
+    A10corregido = A10 + (18200 - P_canal_cerrado_QC1)*.2716,
     A10_mm_corregido = AtoAR(A10corregido),
     Fila = row_number()
 )
