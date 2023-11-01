@@ -149,9 +149,15 @@ scatter = {
     selected_data <- midata %>% dplyr::select(!!sym(x_col), !!sym(a_col))
     
   if (fitear){
+      
+      # Remove rows with missing values using na.omit()
+      data_a_fitear <- na.omit(selected_data)
       # Fit a linear model
-      lm_model <- lm(selected_data[[a_col]] ~ selected_data[[x_col]])
+      lm_model <- lm(data_a_fitear[[a_col]] ~ data_a_fitear[[x_col]])
       print(summary(lm_model))
+      # Calculate the correlation between x and y
+      correlation_coefficient <- cor(data_a_fitear[[x_col]], data_a_fitear[[a_col]])
+      print(paste("Correlation coefficient: ",correlation_coefficient))
     }
   
   # Create scatter plot using ggplot2
