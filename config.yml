@@ -1,29 +1,57 @@
 sheet_id: 1k10kj7jHHr8vDWXKHHN4v6UCd2gn5u5cq2a9960cfTo
 sheet_name: 03_Registro
-range: '!A4:AQ'
-qc1_min: 18000
-qc3_min: 17500
-deltaCC_max: 2000
-delta_pmed_max: 400
+range: '!A4:AR'
+qc1_min: 1600
+qc3_min: 1600
+deltaCC_max: 20000
+delta_pmed_max: 40000
 pbase_min: 12
-date_from: 19638.0
+date_from: 19648.0
 deltaTz_max: 0.5
-muestra: SANGRE
+muestra:
+- SANGRE
+- ROTROL P
+- ROTROL P DESC
+- SANGRE DILUIDA
 activacion:
 - in-tem
 - aPTTest W
 values_freq: '1'
 plot_type: scatter
 x_var: Prueba
-y_var: P_canal_cerrado_QC3
-color_var: Problema
+y_var: A10corregido
+color_var: Muestra
 shape_var: Activacion
 problemas: Good
 pruebas_cambio:
-- 44b
-- '53'
-- '58'
-- '81'
+- '014'
+- '024'
+- 034b
+- 038
+- 042a
+- '046'
+- 0CT08_SL
+- '050'
+- '066'
+- 088
+- 095
 - '101'
 - '104'
-- '106'
+- '110'
+- '115'
+eras:
+- Mejora del dispensado
+- Cambio de placa
+- Aumentamos mezclado a 3
+- Versión de Firmware 2.0.17
+- Frecuencia a 1 Hz
+- Ajuste válvula y alineación émbolo
+- Vilas a sala limpia
+- Vilas al contenedor temp amb baja
+- Mezclado de 3 a 14 mezclados
+- Mayor cantidad de carrier
+- Modificaciones luer, embolo y pipeta
+- Control de pmed - med Home superior
+- Med. en pos 15 uL y casita Manifold
+- Mediciones en Home superior
+- Med. en pos 15 uL
