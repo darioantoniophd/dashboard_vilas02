@@ -91,6 +91,36 @@ my_data <- my_data %>%
     A10_mm_corregido = AtoAR(A10corregido),
     Fila = row_number()
 )
+
+# Create column "era" and assign values
+my_data <- my_data %>%
+  mutate(Era = NA)  # Initialize the 'era' column with NAs
+
+# Combine the lists into a data frame
+prueba_era_data <- data.frame(selected_prueba = config$pruebas_cambio, eras = config$eras)
+
+# Loop through prueba values in my_data
+
+i=1
+first = TRUE
+last = FALSE
+for (j in 1:nrow(my_data)) 
+{
+  if (my_data$Prueba[j] == prueba_era_data$selected_prueba[i]) 
+  {
+    my_data$Era[j] <- prueba_era_data$eras[i]
+    if(i+1<=nrow(prueba_era_data)) {i = i+1}
+      else last = TRUE
+    first = FALSE
+  }
+  else if (first) 
+  {my_data$Era[j] <- "Configuración inicial"}
+  else if (last)
+  {my_data$Era[j] <- prueba_era_data$eras[i]}
+  else
+  {my_data$Era[j] <- prueba_era_data$eras[i-1]} 
+}
+
 #subset con las mediciones tienen datos en A10
 my_data <- subset(my_data, !is.na(A10))
 #subset con las mediciones que no tuvieron problemas y tienen datos en A10
@@ -122,7 +152,6 @@ my_data_QC_con_problema <- subset(my_data_QC, Problema !="ninguno")
 #   geom_point(size= 3) +
 #   common_theme+
 #   geom_smooth(method='lm', formula= y~x)
-
 
 ```
 
@@ -248,7 +277,7 @@ Column {.sidebar}
 
 ```{r}
 num_variables <- sort(c('Prueba','Medicion','Fecha','A1','A5','A10','A10_mm','A20','CT','Amplitud_base','P_canal_abierto_QC2','deltaCC','P_canal_cerrado_QC1','P_canal_cerrado_QC3','P_desprendimiento','CT_R','A10_R','Pmed_base','deltaPmed','Alpha','Fase_A10','Tz_i','Tz_A10','deltaTz','A10corregido','A10_mm_corregido','Fila','Sujeto'))
-cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema','Sujeto'))
+cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pmed','Nro_Cartucho','Picos_curva_pmed','Pasa_criterio_fase','Resultado','Medicion','Fecha','Problema','Sujeto','Era'))
 
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(my_data$Activacion), multiple = TRUE, selected = config$activacion)
@@ -279,7 +308,7 @@ actionButton("reset_button", "Reset Selection", class = "btn-space")
 
 ```
 
-Column {data-width=650}
+Column {data-width=800}
 -----------------------------------------------------------------------
 
 ### Resultados de las Mediciones
@@ -350,8 +379,25 @@ observeEvent(input$reset_button, {
 
 ```
 
-Column {data-width=350}
+Column {data-width=200}
 -----------------------------------------------------------------------
+
+### N Prueba de valores normales
+
+```{r}
+# Assuming your dataset is named 'df'
+# Load your dataset or replace 'df' with your dataset name
+
+# Filter the rows where XXX is equal to "PVN"
+pvn_data <- subset(my_data_QC_sin_problema, substr(Prueba, 1, 3) == "PVN" & Muestra == "SANGRE")
+
+# Find the number of unique values in the filtered "Prueba" column
+unique_values_count <- length(unique(pvn_data$Prueba))
+
+valueBox(unique_values_count, icon = "fa-droplet")
+
+
+```
 
 ### Porcentaje de mediciones con problemas
 
@@ -446,6 +492,7 @@ renderDataTable({
 * Día 101 – 26/09/2023 -- Se comienza a medir con control de presión media - Mediciones en Home superior
 * Día 104 - 29/09/2023 -- Mediciones en posición 15 uL y agregado de casita Manifold
 * Día 110 - 09/10/23 --  Mediciones en Home superior
+* Día 115 - 24/10/23 – Mediciones en posición 15 uL (12800 pasos)
 
 ### Problemas principales
 * Hay una correlación positiva entre A10 y deltaPmed (ver A10 vs deltaPmed). La variabilidad de deltaPmed entre mediciones afecta la repetibilidad de A10. Esto sucede para valores de deltaPmed superiores a aproximadamente 300 Pa. Para valores de deltaPmed más bajos no hay correlación.
