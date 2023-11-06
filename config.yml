@@ -10,18 +10,16 @@ date_from: 19648.0
 deltaTz_max: 0.5
 muestra:
 - SANGRE
-- ROTROL P
-- ROTROL P DESC
-- SANGRE DILUIDA
+- PVN
 activacion:
 - in-tem
 - aPTTest W
 values_freq: '1'
 plot_type: scatter
 x_var: Prueba
-y_var: A10corregido
+y_var: A10
 color_var: Muestra
-shape_var: Activacion
+shape_var: Muestra
 problemas: Good
 pruebas_cambio:
 - '014'

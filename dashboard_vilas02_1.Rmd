@@ -215,8 +215,8 @@ boxplot = {
   labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col, shape=shape_col)+
   common_theme+
  
-  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.7, label = paste0("", N)),  size = 3, color = "red") +
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.9, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") 
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.1, label = paste0("", N)),  size = 3, color = "red") +
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.2, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") 
 } ,
 boxplot_sd = {
   # boxplot with labels
@@ -235,10 +235,8 @@ boxplot_sd = {
   geom_segment(data = cv_data, aes(x = .data[[x_col]], xend=.data[[x_col]],  y = mean - sd, yend = mean + sd, color=dcolor ), size = 1.5) +
   labs(title = paste0(a_col, " vs. ", x_col), x = x_col, y = a_col, color = color_col) +
   common_theme +
-  geom_text(data = N_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.7, label = paste0("", N)),  size = 3, color = "red") +
-  #geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*1.15, label = paste0("", round(sd,0))),  angle = 0, size = 3, color = "brown")+
-  geom_text(data = cv_data, aes(x = .data[[x_col]], y = min(midata[[a_col]])*.9, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") #+
-  #geom_text(data = cv_data, aes(x = .data[[x_col]], y = mean, label = paste0("", round(mean,0))), hjust = -1, size = 3, color = "black") 
+  geom_text(data = N_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.1, label = paste0("", N)),  size = 3, color = "red") +
+  geom_text(data = cv_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.2, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") 
 } ,
 sigma_A = {
   # boxplot with labels
@@ -282,9 +280,9 @@ cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pm
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(my_data$Activacion), multiple = TRUE, selected = config$activacion)
 selectInput("values_freq", "Select values for Frequency:", choices = unique(my_data$Frecuencia), multiple = TRUE, selected = config$values_freq)
-selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','sigma_A'), multiple = FALSE,selected =config$plot_type)
+selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd'), multiple = FALSE,selected =config$plot_type)
 
-selectInput("x_var", "Select X axis variable:", choices = num_variables, multiple = FALSE, selected = config$x_var) 
+selectInput("x_var", "Select X axis variable:", choices = c(num_variables,'Muestra','Activacion'), multiple = FALSE, selected = config$x_var) 
 selectInput("y_var", "Select Y axis variable:", choices = num_variables, multiple = FALSE, selected =config$y_var)
 
 selectInput("color_var", "Select color variable:", choices = cat_variables, multiple = FALSE, selected =config$color_var)
@@ -389,7 +387,7 @@ Column {data-width=200}
 # Load your dataset or replace 'df' with your dataset name
 
 # Filter the rows where XXX is equal to "PVN"
-pvn_data <- subset(my_data_QC_sin_problema, substr(Prueba, 1, 3) == "PVN" & Muestra == "SANGRE")
+pvn_data <- subset(my_data_QC_sin_problema, Muestra == "PVN")
 
 # Find the number of unique values in the filtered "Prueba" column
 unique_values_count <- length(unique(pvn_data$Prueba))
