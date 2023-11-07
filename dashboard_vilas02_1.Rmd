@@ -31,7 +31,7 @@ options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
 # Get the sheet ID and sheet name
 
 AtoAR <- function(A)
-{  AR <- 100/(1+1100/A)
+{  AR <- 0.024060*A+24.56
   return(AR) }
 
 sheet_id <- config$sheet_id
@@ -387,7 +387,7 @@ Column {data-width=200}
 # Load your dataset or replace 'df' with your dataset name
 
 # Filter the rows where XXX is equal to "PVN"
-pvn_data <- subset(my_data_QC_sin_problema, Muestra == "PVN")
+pvn_data <- subset(my_data_QC_sin_problema, substr(Prueba, 1, 3) == "PVN" & Muestra == "SANGRE")
 
 # Find the number of unique values in the filtered "Prueba" column
 unique_values_count <- length(unique(pvn_data$Prueba))
