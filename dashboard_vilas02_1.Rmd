@@ -40,6 +40,7 @@ sheet_name <- config$sheet_name
 range <- paste0(sheet_name, config$range)
 # Read the sheet data into R as a data frame, using the fourth row as the column names
 my_data <- read_sheet(sheet_id, sheet_name, range, col_names = TRUE)
+my_data <- my_data[!is.na(my_data$Prueba), ]
 
 my_data <- my_data %>%
   mutate(
@@ -238,6 +239,11 @@ boxplot_sd = {
   geom_text(data = N_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.1, label = paste0("", N)),  size = 3, color = "red") +
   geom_text(data = cv_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.2, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") 
 } ,
+histo = {
+  
+  # Create a basic histogram
+  plot_ly(midata, x = ~ .data[[a_col]], type = "histogram", nbinsx = "auto")
+} ,
 sigma_A = {
   # boxplot with labels
   # calculate CV values for each group
@@ -280,7 +286,7 @@ cat_variables <- sort(c('Prueba','Activacion','Muestra','Comportamiento_curva_pm
 selectInput("values_muestra", "Select values for Muestra:", choices = unique(my_data$Muestra), multiple = TRUE, selected = config$muestra)
 selectInput("values_activacion", "Select values for Activacion:", choices = unique(my_data$Activacion), multiple = TRUE, selected = config$activacion)
 selectInput("values_freq", "Select values for Frequency:", choices = unique(my_data$Frecuencia), multiple = TRUE, selected = config$values_freq)
-selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd'), multiple = FALSE,selected =config$plot_type)
+selectInput("plot_type", "Select plot type:", choices = c('scatter','boxplot','boxplot_sd','histo'), multiple = FALSE,selected =config$plot_type)
 
 selectInput("x_var", "Select X axis variable:", choices = c(num_variables,'Muestra','Activacion'), multiple = FALSE, selected = config$x_var) 
 selectInput("y_var", "Select Y axis variable:", choices = num_variables, multiple = FALSE, selected =config$y_var)
