@@ -3,14 +3,12 @@ sheet_name: 03_Registro
 range: '!A4:AR'
 qc1_min: 1600
 qc3_min: 1600
-deltaCC_max: 20000
+deltaCC_max: 2000
 delta_pmed_max: 40000
 pbase_min: 12
-date_from: 19648.0
+date_from: 19652.0
 deltaTz_max: 0.5
-muestra:
-- SANGRE
-- PVN
+muestra: SANGRE
 activacion:
 - in-tem
 - aPTTest W
@@ -18,7 +16,7 @@ values_freq: '1'
 plot_type: scatter
 x_var: Prueba
 y_var: A10
-color_var: Muestra
+color_var: Era
 shape_var: Muestra
 problemas: Good
 pruebas_cambio:
@@ -37,6 +35,7 @@ pruebas_cambio:
 - '104'
 - '110'
 - '115'
+- PVN-17A
 eras:
 - Mejora del dispensado
 - Cambio de placa
@@ -53,3 +52,4 @@ eras:
 - Med. en pos 15 uL y casita Manifold
 - Mediciones en Home superior
 - Med. en pos 15 uL
+- Med. en pos home=4000 pasos
