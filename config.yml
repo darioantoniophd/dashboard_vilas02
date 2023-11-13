@@ -3,8 +3,8 @@ sheet_name: 03_Registro
 range: '!A4:AR'
 qc1_min: 1600
 qc3_min: 1600
-deltaCC_max: 20000
-delta_pmed_max: 40000
+deltaCC_max: 2000
+delta_pmed_max: 350
 pbase_min: 12
 date_from: 19648.0
 deltaTz_max: 0.5
