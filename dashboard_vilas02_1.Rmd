@@ -14,6 +14,7 @@ library(dplyr)
 library(ggplot2)
 library(yaml)
 library(plotly)
+library(MASS)
 
 ```
 
@@ -88,7 +89,7 @@ my_data <- my_data %>%
     deltaTz = Tz_A10-Tz_i,
     deltaPmed = Pmed_A10 - Pmed_base,
     #A10corregido = A10 + (18200 - P_canal_cerrado_QC3)*.1355,
-    A10corregido = A10 + (18200 - P_canal_cerrado_QC1)*.2716,
+    A10corregido = A10 + (18200 - P_canal_cerrado_QC1)*.15,
     A10_mm_corregido = AtoAR(A10corregido),
     Fila = row_number()
 )
@@ -240,9 +241,29 @@ boxplot_sd = {
   geom_text(data = cv_data, aes(x = .data[[x_col]], y = max(midata[[a_col]])*.2, label = paste0("", round(cv,0), "%")),  angle = 0, size = 3, color = "blue") 
 } ,
 histo = {
-  
+  data <- midata %>% dplyr::select(!!sym(a_col))
   # Create a basic histogram
-  plot_ly(midata, x = ~ .data[[a_col]], type = "histogram", nbinsx = "auto")
+  
+  p <- plot_ly(midata, x = ~ .data[[a_col]], type = "histogram", nbinsx = "auto")
+  # Fit a Gaussian distribution
+  fit <- fitdistr(data[[a_col]], "normal")
+
+  # Overlay Gaussian fit on histogram
+  x <- seq(min(data[[a_col]]), max(data[[a_col]]), length = 100)
+  y <- dnorm(x, mean = fit$estimate[1], sd = fit$estimate[2])
+  # Scale the Gaussian fit to match the histogram
+  scaled_y <- y * length(data[[a_col]]) * diff(hist(data[[a_col]])$breaks[1:2])/2 # este divido dos está mal pero la normalizacion no funciona porque el area dad por hist() no es la misma que la de plot_ly()
+  
+  # Add Gaussian fit trace
+  p <- add_trace(p, x = x, y = scaled_y, type = "scatter", mode = "lines", line = list(color = "red"), name = "Gaussian Fit")
+
+  # Display mean and standard deviation
+  mean_text <- paste("Mean: ", round(fit$estimate[1], 2))
+  sd_text <- paste("SD: ", round(fit$estimate[2], 2))
+  annotation <- list(x = max(data[[a_col]]), y = max(y), text = paste(mean_text, "<br>", sd_text),
+                   showarrow = FALSE, xref = "x", yref = "y")
+  p <- layout(p, annotations = list(annotation))
+  return (p)
 } ,
 sigma_A = {
   # boxplot with labels
@@ -468,12 +489,15 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
 
 ```{r}
 renderDataTable({
-  midata() %>%
-    select(Fila, Medicion, Fecha, Observaciones,A10,Pasa_criterio_fase,Resultado) %>% arrange(desc(Fila)) 
+  midata = midata()
+  # midata %>%
+  #   select(Fila, Medicion, Fecha, Observaciones,A10,Pasa_criterio_fase,Resultado) %>% arrange(desc(Fila))
+  # ver por que no funciona el select!!
 },options = list(
     lengthMenu = list(c(5, 15, 20), c('5', '15', '20')),
     pageLength = 15
   ))
+
 
 
 
