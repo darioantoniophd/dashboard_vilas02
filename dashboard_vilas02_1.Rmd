@@ -9,6 +9,7 @@ runtime: shiny
 
 ```{r setup, include=FALSE}
 
+library(shiny)
 library(flexdashboard)
 library(dplyr)
 library(ggplot2)
@@ -20,27 +21,40 @@ library(MASS)
 
 ```{r}
 
-# Load the googlesheets4 package
-library(googlesheets4)
+
 config = yaml.load_file("config.yml")
-# Authenticate with Google Sheets (you may be prompted to sign in)
-gs4_auth(email=TRUE)
 
 options(date.format = "%d/%m/%y", stringsAsFactors = FALSE)
-
-# Cargar la tabla VL2-R-01-Registro de mediciones
-# Get the sheet ID and sheet name
 
 AtoAR <- function(A)
 {  AR <- 0.024060*A+24.56
   return(AR) }
 
-sheet_id <- config$sheet_id
-sheet_name <- config$sheet_name
-# Set the range to read, starting from the fourth row
-range <- paste0(sheet_name, config$range)
-# Read the sheet data into R as a data frame, using the fourth row as the column names
-my_data <- read_sheet(sheet_id, sheet_name, range, col_names = TRUE)
+# Cargar la tabla VL2-R-01-Registro de mediciones
+if (config$local_file){
+  my_data <- readRDS("mediciones_VILAS.rds")
+} else {
+  # Load the googlesheets4 package
+  library(googlesheets4)
+  # Authenticate with Google Sheets (you may be prompted to sign in)
+  gs4_auth(email=TRUE)
+  # Get the sheet ID and sheet name
+  sheet_id <- config$sheet_id
+  sheet_name <- config$sheet_name
+  # Set the range to read, starting from the fourth row
+  range <- paste0(sheet_name, config$range)
+  # Read the sheet data into R as a data frame, using the fourth row as the column names
+  my_data <- read_sheet(sheet_id, sheet_name, range, col_names = TRUE)
+  # Uncomment if my_data should be saved locally
+  #saveRDS(my_data, "mediciones_VILAS.rds")
+
+}
+
+
+```
+
+```{r}
+
 my_data <- my_data[!is.na(my_data$Prueba), ]
 
 my_data <- my_data %>%
@@ -93,6 +107,11 @@ my_data <- my_data %>%
     A10_mm_corregido = AtoAR(A10corregido),
     Fila = row_number()
 )
+
+
+```
+
+```{r}
 
 # Create column "era" and assign values
 my_data <- my_data %>%
@@ -488,7 +507,7 @@ if ("ninguno" %in% problema_count$Problema && nrow(problema_count) == 1) {
 # Tabla mediciones 
 
 ```{r}
-renderDataTable({
+DT::renderDT({
   midata = midata()
   # midata %>%
   #   select(Fila, Medicion, Fecha, Observaciones,A10,Pasa_criterio_fase,Resultado) %>% arrange(desc(Fila))
