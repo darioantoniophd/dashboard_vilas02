@@ -1,0 +1,12 @@
+name: dashboard_vilas02_1
+title: dashboard_vilas02_1
+username: darioantonio
+account: darioantonio
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12171435
+bundleId: 8733249
+url: https://darioantonio.shinyapps.io/dashboard_vilas02_1/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
