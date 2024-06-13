@@ -7,6 +7,7 @@ Overall, this application provides a comprehensive tool for visualizing, analyzi
 Online deployment of the dashboard:
 http://darioantonio.shinyapps.io/dashboard_vilas02_1
 
+![Screenshot example](screenshot.png)
 
 Here's a summary of what the code does:
 
@@ -38,5 +39,5 @@ Here's a summary of what the code does:
 
 14. **Display conclusions and observations**: The code includes markdown sections to display conclusions, observations, and a timeline of events related to the measurement process.
 
- ![Screenshot example](screenshot.png)
+ 
 
