@@ -30,9 +30,10 @@ AtoAR <- function(A)
 {  AR <- 0.024060*A+24.56
   return(AR) }
 
-# Cargar la tabla VL2-R-01-Registro de mediciones
+# Load measurement log from local disk
 if (config$local_file){
   my_data <- readRDS("mediciones_VILAS.rds")
+# Optionally load measurement table from Google sheets
 } else {
   # Load the googlesheets4 package
   library(googlesheets4)
@@ -54,7 +55,7 @@ if (config$local_file){
 ```
 
 ```{r}
-
+# clean imported data
 my_data <- my_data[!is.na(my_data$Prueba), ]
 
 my_data <- my_data %>%
@@ -121,36 +122,41 @@ my_data <- my_data %>%
 prueba_era_data <- data.frame(selected_prueba = config$pruebas_cambio, eras = config$eras)
 
 # Loop through prueba values in my_data
-
+# Initialize the index i to 1
 i=1
+# Set the flag 'first' to TRUE indicating the first row hasn't been processed yet
 first = TRUE
+# Set the flag 'last' to FALSE indicating we haven't reached the end of the eras
 last = FALSE
+# Loop through each row of 'my_data'
 for (j in 1:nrow(my_data)) 
+    # Check if the current row's 'Prueba' value in 'my_data' matches the selected 'prueba' in 'prueba_era_data' which corresponds to a change in era
 {
-  if (my_data$Prueba[j] == prueba_era_data$selected_prueba[i]) 
+  if (my_data$Prueba[j] == prueba_era_data$selected_prueba[i]) # a row in my_data$Prueba that corresponds to a change in era is reached
   {
-    my_data$Era[j] <- prueba_era_data$eras[i]
-    if(i+1<=nrow(prueba_era_data)) {i = i+1}
+    my_data$Era[j] <- prueba_era_data$eras[i]  # assign the name of the era that corresponds to that prueba
+    if(i+1<=nrow(prueba_era_data)) {i = i+1} # if the last era has not been reached, i points to the next era, i-1 points to the current era
       else last = TRUE
     first = FALSE
   }
   else if (first) 
-  {my_data$Era[j] <- "Configuración inicial"}
+  {my_data$Era[j] <- "Configuración inicial"}     # Initial configuration , before named "eras"
   else if (last)
-  {my_data$Era[j] <- prueba_era_data$eras[i]}
+  {my_data$Era[j] <- prueba_era_data$eras[i]}   # once the last era is reached, it continues to apply that era to any remaining rows
   else
-  {my_data$Era[j] <- prueba_era_data$eras[i-1]} 
+  {my_data$Era[j] <- prueba_era_data$eras[i-1]} # apply current era to the row
 }
 
-#subset con las mediciones tienen datos en A10
+
+
+# Subset with the measurements that have data in A10
 my_data <- subset(my_data, !is.na(A10))
-#subset con las mediciones que no tuvieron problemas y tienen datos en A10
+# Subset with the measurements that had no issues and have data in A10
 my_data_sin_problema <- subset(my_data, Problema == "ninguno")
-#subset con las mediciones que sí tuvieron problemas y tienen datos en A10
+# Subset with the measurements that did have issues and have data in A10
 my_data_con_problema <- subset(my_data, Problema != "ninguno")
 
-# subset donde se aplica quality check y se pone como problema el motivo de falla
-#my_data_QC <- subset_data
+# Subset where a quality check is applied and the reason for failure is recorded as an issue
 my_data_QC <- my_data
 my_data_QC$Problema[my_data_QC$Amplitud_base < config$pbase_min] <- 'QC_failed_Pbase'
 my_data_QC$Problema[abs(my_data_QC$deltaPmed) > config$delta_pmed_max ] <- 'delta_Pmed'
@@ -161,18 +167,14 @@ my_data_QC$Problema[my_data_QC$Pasa_criterio_fase == "no"] <- 'no_pasa_fase'
 my_data_QC$Problema[abs(my_data_QC$deltaCC) > config$deltaCC_max] <- 'deltaCC_Alto'
 my_data_QC$Problema[abs(my_data_QC$deltaTz) > config$deltaTz_max] <- 'deltaTz_Alto'
 
-# actualiza columna Resultado con falsos positivos y falsos negativos del QC
+# Update the Result column with false positives and false negatives from the QC
 my_data_QC$Resultado[my_data_QC$Problema !=  'ninguno' & my_data_QC$Resultado == 'Buena'] <- 'Falso_negativo_QC'
 my_data_QC$Resultado[my_data_QC$Problema ==  'ninguno' & my_data_QC$Resultado == 'Mala'] <- 'Falso_positivo_QC'
 
-# subset con las mediciones que pasaron el QC 
+# Subset with the measurements that passed the QC
 my_data_QC_sin_problema <- subset(my_data_QC, Problema =="ninguno")
 my_data_QC_con_problema <- subset(my_data_QC, Problema !="ninguno")
 
-# ggplot(my_data_QC_sin_problema,aes(P_canal_cerrado_QC3, A10)) +
-#   geom_point(size= 3) +
-#   common_theme+
-#   geom_smooth(method='lm', formula= y~x)
 
 ```
 
@@ -183,15 +185,9 @@ common_theme <- theme_bw() +
     axis.text.x = element_text(angle = 90, vjust = 0.5, size = 14),
     axis.text.y = element_text(size = 14)
   )
-# my_palette <- c("#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFFF00",
-#                 "#FFA500", "#800080", "#008000", "#000080", "#800000", "#008080",
-#                 "#FFC0CB", "#FF6347", "#00CED1", "#8B4513", "#2E8B57", "#DAA520",
-#                 "#9932CC", "#FF1493")
 
-# funcion que plotea datos
+# Function that plots data
 my_plot <- function(midata, x_col, a_col, color_col, shape_col, plot_type, fitear) {
-# Read the JPEG image
-# img <- readJPEG("felici.jpeg")
 
 switch(plot_type,
 scatter = {
@@ -369,7 +365,7 @@ applyCommonFilter <- function(data, input) {
   )
   return(filtered_data)
 }
-# # Filtra todas las mediciones según selección de la gui
+# Filters all the measurements according to the selection made in the gui
  midata <- reactive({
    data_to_use <- if (input$aplicar_QC) my_data_QC else my_data
    filtered_data <- applyCommonFilter(data_to_use, input)
@@ -429,8 +425,6 @@ Column {data-width=200}
 ### N Prueba de valores normales
 
 ```{r}
-# Assuming your dataset is named 'df'
-# Load your dataset or replace 'df' with your dataset name
 
 # Filter the rows where XXX is equal to "PVN"
 pvn_data <- subset(my_data_QC_sin_problema, substr(Prueba, 1, 3) == "PVN" & Muestra == "SANGRE")
